@@ -18,7 +18,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   bool _loading = false;
 
-  buildTweets(Feed feed, UserModel author) {
+  buildFeeds(Feed feed, UserModel author) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: FeedContainer(
@@ -72,7 +72,7 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.white,
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.white,
-          child: Image.asset('assets/tweet.png'),
+          child: Image.asset('assets/logo_autitrack.png'),
           onPressed: () {
             Navigator.push(
                 context,
@@ -88,7 +88,7 @@ class _MainPageState extends State<MainPage> {
           centerTitle: true,
           leading: Container(
             height: 40,
-            child: Image.asset('assets/logo.png'),
+            //child: Image.asset('assets/logo.png'),
           ),
           title: Text(
             'Home Screen',

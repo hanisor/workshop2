@@ -59,7 +59,6 @@ class EducatorRegistrationController {
 
         if (userCredential.user != null) {
           // Get the UID of the newly created user
-          String userId = userCredential.user!.uid;
 
           // Register educator with the ID
           await _registrationRepository.registerEducator(educator);

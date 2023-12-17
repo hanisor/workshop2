@@ -1,6 +1,7 @@
 class EducatorModel {
   final String? id;
   final String name;
+  final String? profilePic;
   final String expertise;
   final String phoneNumber;
   final String email;
@@ -11,6 +12,7 @@ class EducatorModel {
   const EducatorModel ({
     this.id,
     required this.name,
+    required this.profilePic,
     required this.expertise,
     required this.phoneNumber,
     required this.email,

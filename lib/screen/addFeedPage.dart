@@ -3,7 +3,7 @@
   import 'package:flutter/material.dart';
   import 'package:image_picker/image_picker.dart';
   import '../constants/constants.dart';
-import '../model/feedModel.dart';
+  import '../model/feedModel.dart';
   import '../services/databaseServices.dart';
   import '../services/storageServices.dart';
   import '../widget/roundedButton.dart';

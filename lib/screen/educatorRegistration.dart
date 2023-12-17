@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:workshop_test/controller/educatorLoginController.dart';
 import '../model/educatorModel.dart';
 import '../screen/educatorLogin.dart';
 
@@ -13,6 +16,7 @@ class EducatorRegistration extends StatefulWidget {
 }
 
 class _EducatorRegistrationState extends State<EducatorRegistration> {
+  final _registerController = EducatorRegistrationController(); // Initialize ParentLoginController
   final educatorNameEditingController = TextEditingController();
   final educatorEmailEditingController = TextEditingController();
   final educatorPhoneEditingController = TextEditingController();
@@ -28,7 +32,6 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
 
-
   void createAccount() async {
     String eName = educatorNameEditingController.text.trim();
     String eEmail = educatorEmailEditingController.text.trim();
@@ -38,12 +41,14 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
     String eRePassword = educatorRePassEditingController.text.trim();
     String eRole = "educator";
     String educatorId = uuid.v4(); // Generate a random UUID
+    String? eprofilePicPath = _imageFile != null ? _imageFile!.path : null;
 
 
 
     EducatorModel educator = EducatorModel(
       id: educatorId, // Assign the 'id' here
       name: eName,
+      profilePic: eprofilePicPath,
       phoneNumber: ePhone,
       expertise: eExpertise,
       email: eEmail,
@@ -53,8 +58,26 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
     );
 
 
-    _controller.createAccount(context, educator);
+    await _controller.createAccount(context, educator);
+
   }
+
+  File? _imageFile;
+
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedImage != null) {
+        _imageFile = File(pickedImage.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+
 
 
   @override
@@ -77,6 +100,22 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
             Text(
               "Create your account",
               style: Theme.of(context).textTheme.bodyMedium,
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.add_photo_alternate),
+                    onPressed: _pickImage,
+                  ),
+                  // Display selected image
+                  _imageFile != null
+                      ? Image.file(_imageFile!)
+                      : Text('No image selected.'),
+                ],
+              ),
             ),
 
             Padding(

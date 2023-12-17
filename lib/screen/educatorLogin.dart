@@ -28,6 +28,7 @@ class _EducatorLogin extends State<EducatorLogin> {
       email: eEmail,
       password: ePassword,
       name: '',
+      profilePic: '',
       expertise: '',
       phoneNumber: '',
       rePassword: '',

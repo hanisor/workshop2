@@ -21,7 +21,7 @@ class EducatorLoginController {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddFeedPage(currentUserId: currentUserId),
+              builder: (context) => MainPage(currentUserId: currentUserId),
             ),
         );
       }

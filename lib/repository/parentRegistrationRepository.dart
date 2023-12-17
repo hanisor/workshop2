@@ -10,6 +10,7 @@ class ParentRegisterRepository {
     await parentsCollection.add({
       'parentId': parent.id,
       'parentName': parent.name,
+      'parentProfilePicture': parent.profilePic,
       'parentPhone': parent.phoneNumber,
       'parentEmail': parent.email,
       'parentPassword': parent.password,

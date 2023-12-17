@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import '../controller/parentLoginController.dart';
 import '../screen/parentLogin.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 
 import '../controller/parentRegistrationController.dart';
 import '../model/parentModel.dart';
@@ -11,7 +15,7 @@ class ParentRegistration extends StatefulWidget {
 }
 
 class _ParentRegistrationState extends State<ParentRegistration> {
-
+  final _loginController = ParentLoginController(); // Initialize ParentLoginController
   final parentNameEditingController = TextEditingController();
   final parentEmailEditingController = TextEditingController();
   final parentPhoneEditingController  = TextEditingController();
@@ -35,12 +39,13 @@ class _ParentRegistrationState extends State<ParentRegistration> {
     String pRePassword = parentRePassEditingController.text.trim();
     String pRole = "parent";
     String parentId = uuid.v4(); // Generate a random UUID
-    String? profilePicPath;
+    String? pprofilePicPath = _imageFile != null ? _imageFile!.path : null;
+
 
     ParentModel parent = ParentModel(
       id : parentId,
       name: pName,
-      profilePic: profilePicPath,
+      profilePic: pprofilePicPath,
       phoneNumber: pPhone,
       email: pEmail,
       password: pPassword,
@@ -48,7 +53,23 @@ class _ParentRegistrationState extends State<ParentRegistration> {
       role: pRole,
     );
 
-    _controller.createAccount(context, parent);
+    await _controller.createAccount(context, parent);
+
+  }
+
+  File? _imageFile;
+
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedImage != null) {
+        _imageFile = File(pickedImage.path);
+      } else {
+        print('No image selected.');
+      }
+    });
   }
 
 
@@ -75,7 +96,22 @@ class _ParentRegistrationState extends State<ParentRegistration> {
                 "Create your account",
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              Padding(
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.add_photo_alternate),
+                    onPressed: _pickImage,
+                  ),
+                  // Display selected image
+                  _imageFile != null
+                      ? Image.file(_imageFile!)
+                      : Text('No image selected.'),
+                ],
+              ),
+            ),
+            Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: TextFormField(
                   decoration: InputDecoration(

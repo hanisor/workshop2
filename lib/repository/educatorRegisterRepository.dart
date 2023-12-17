@@ -10,6 +10,7 @@ class EducatorRegisterRepository {
     await educatorsCollection.add({
       'educatorId': educator.id,
       'educatorName': educator.name,
+      'educatorProfilePic': educator.profilePic,
       'educatorPhone': educator.phoneNumber,
       'educatorExpertise': educator.expertise,
       'educatorEmail': educator.email,
