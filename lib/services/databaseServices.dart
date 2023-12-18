@@ -5,10 +5,10 @@ import '../model/feedModel.dart';
 
 
 class DatabaseServices {
-  static final followersRef = FirebaseFirestore.instance.collection('Followers');
-  static final followingRef = FirebaseFirestore.instance.collection('Following');
-  static final usersRef = FirebaseFirestore.instance.collection('Users');
-  static final feedsRef = FirebaseFirestore.instance.collection('Feeds');
+  // static final followersRef = FirebaseFirestore.instance.collection('Followers');
+  // static final followingRef = FirebaseFirestore.instance.collection('Following');
+  // static final usersRef = FirebaseFirestore.instance.collection('Users');
+  //static final feedsRef = FirebaseFirestore.instance.collection('Feeds');
   // Initialize other references as needed
 
 
@@ -23,15 +23,15 @@ class DatabaseServices {
   //await followingRef.doc(userId).collection('Following').get();
   //return followingSnapshot.docs.length;
   //}
-
-  static Future<QuerySnapshot> searchUsers(String name) async {
-    Future<QuerySnapshot> users = usersRef
-        .where('name', isGreaterThanOrEqualTo: name)
-        .where('name', isLessThan: name + 'z')
-        .get();
-
-    return users;
-  }
+  //
+  // static Future<QuerySnapshot> searchUsers(String name) async {
+  //   Future<QuerySnapshot> users = usersRef
+  //       .where('name', isGreaterThanOrEqualTo: name)
+  //       .where('name', isLessThan: name + 'z')
+  //       .get();
+  //
+  //   return users;
+  // }
 
   //static void followUser(String currentUserId, String visitedUserId) {
   // followingRef
@@ -82,26 +82,26 @@ class DatabaseServices {
   // }
 
   static void createFeed(Feed feed) {
-    feedRefs.doc(feed.authorId).set({'tweetTime': feed.timestamp});
+    feedRefs.doc(feed.authorId).set({'FeedTime': feed.timestamp});
     feedRefs.doc(feed.authorId).collection('userFeeds').add({
       'text': feed.text,
       'image': feed.image,
       "authorId": feed.authorId,
       "timestamp": feed.timestamp,
       'likes': feed.likes,
-    }).then((doc) async {
-      QuerySnapshot followerSnapshot =
-      await followersRef.doc(feed.authorId).collection('Followers').get();
-
-      for (var docSnapshot in followerSnapshot.docs) {
-        feedRefs.doc(docSnapshot.id).collection('userFeed').doc(doc.id).set({
-          'text': feed.text,
-          'image': feed.image,
-          "authorId": feed.authorId,
-          "timestamp": feed.timestamp,
-          'likes': feed.likes,
-        });
-      }
+    // }).then((doc) async {
+    //   QuerySnapshot followerSnapshot =
+    //   await followersRef.doc(feed.authorId).collection('Followers').get();
+    //
+    //   for (var docSnapshot in followerSnapshot.docs) {
+    //     feedRefs.doc(docSnapshot.id).collection('userFeed').doc(doc.id).set({
+    //       'text': feed.text,
+    //       'image': feed.image,
+    //       "authorId": feed.authorId,
+    //       "timestamp": feed.timestamp,
+    //       'likes': feed.likes,
+    //     });
+    //   }
     });
   }
 
@@ -131,7 +131,7 @@ class DatabaseServices {
 
   static void likeFeed(String currentUserId, Feed feed) {
     DocumentReference feedDocProfile =
-    tweetsRef.doc(feed.authorId).collection('userTweets').doc(feed.id);
+    feedRefs.doc(feed.authorId).collection('userTweetsFeeds').doc(feed.id);
     feedDocProfile.get().then((doc) {
       if (doc.exists) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?; // Explicit casting

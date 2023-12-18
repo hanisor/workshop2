@@ -3,15 +3,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:workshop_test/screen/HomePage.dart';
-import 'package:workshop_test/screen/mainPage.dart';
+import 'package:workshop_test/screen/menu.dart';
 import 'firebase_options.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
   await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+
+
   runApp(MyApp());
 }
 class MyApp extends StatelessWidget {
@@ -23,9 +26,9 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (BuildContext context, snapshot) {
           if (snapshot.hasData) {
-            return MainPage(currentUserId: snapshot.data!.uid);
+            return Menu(currentUserId: snapshot.data!.uid);
           } else {
-            return MainPage(currentUserId: '',);
+            return HomePage();
           }
         });
   }
@@ -39,7 +42,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
       ),
-      home: HomePage(),
+      home: getScreenId(),
     );
   }
 }

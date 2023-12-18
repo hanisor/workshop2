@@ -8,7 +8,7 @@ final _fireStore = FirebaseFirestore.instance;
 
 final storageRef = FirebaseStorage.instance.ref();
 
-final tweetsRef = _fireStore.collection('tweets');
+final usersRef = _fireStore.collection('users');
 
 final feedRefs = _fireStore.collection('feeds');
 

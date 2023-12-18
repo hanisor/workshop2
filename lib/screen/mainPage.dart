@@ -4,6 +4,7 @@ import 'package:workshop_test/screen/addFeedPage.dart';
 import '../constants/constants.dart';
 import '../model/feedModel.dart';
 import '../model/usermodel.dart';
+import '../services/databaseServices.dart';
 import '../widget/feedContainer.dart';
 
 class MainPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  List _followingFeeds = [];
   bool _loading = false;
 
   buildFeeds(Feed feed, UserModel author) {
@@ -29,42 +31,42 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // showFollowingTweets(String currentUserId) {
-  //   List<Widget> followingTweetsList = [];
-  //   for (Tweet tweet in _followingTweets) {
-  //     followingTweetsList.add(FutureBuilder(
-  //         future: usersRef.doc(tweet.authorId).get(),
-  //         builder: (BuildContext context, AsyncSnapshot snapshot) {
-  //           if (snapshot.hasData) {
-  //             UserModel author = UserModel.fromDoc(snapshot.data);
-  //             return buildTweets(tweet, author);
-  //           } else {
-  //             return SizedBox.shrink();
-  //           }
-  //         }));
-  //   }
-  //   return followingTweetsList;
-  // }
-  //
-  // setupFollowingTweets() async {
-  //   setState(() {
-  //     _loading = true;
-  //   });
-  //   List followingTweets =
-  //   await DatabaseServices.getHomeTweets(widget.currentUserId);
-  //   if (mounted) {
-  //     setState(() {
-  //       _followingTweets = followingTweets;
-  //       _loading = false;
-  //     });
-  //   }
-  // }
+  showFeeds(String currentUserId) {
+    List<Widget> followingFeedsList = [];
+    for (Feed feed in _followingFeeds) {
+      followingFeedsList.add(FutureBuilder(
+          future: usersRef.doc(feed.authorId).get(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              UserModel author = UserModel.fromDoc(snapshot.data);
+              return buildFeeds(feed, author);
+            } else {
+              return SizedBox.shrink();
+            }
+          }));
+    }
+    return followingFeedsList;
+  }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   setupFollowingTweets();
-  // }
+  setupFollowingTweets() async {
+    setState(() {
+      _loading = true;
+    });
+    List followingFeeds =
+    await DatabaseServices.getHomeFeeds(widget.currentUserId);
+    if (mounted) {
+      setState(() {
+        _followingFeeds = followingFeeds;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setupFollowingTweets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +74,6 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.white,
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.white,
-          child: Image.asset('assets/logo_autitrack.png'),
           onPressed: () {
             Navigator.push(
                 context,
@@ -80,7 +81,7 @@ class _MainPageState extends State<MainPage> {
                     builder: (context) => AddFeedPage(
                       currentUserId: widget.currentUserId,
                     )));
-          },
+          },child: Icon(Icons.add), // Icon for the button
         ),
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -88,7 +89,7 @@ class _MainPageState extends State<MainPage> {
           centerTitle: true,
           leading: Container(
             height: 40,
-            //child: Image.asset('assets/logo.png'),
+            child: Image.asset('assets/logo_autitrack.png'),
           ),
           title: Text(
             'Home Screen',

@@ -41,14 +41,14 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
     String eRePassword = educatorRePassEditingController.text.trim();
     String eRole = "educator";
     String educatorId = uuid.v4(); // Generate a random UUID
-    String? eprofilePicPath = _imageFile != null ? _imageFile!.path : null;
+    //String? eprofilePicPath = _imageFile != null ? _imageFile!.path : null;
 
 
 
     EducatorModel educator = EducatorModel(
       id: educatorId, // Assign the 'id' here
       name: eName,
-      profilePic: eprofilePicPath,
+      profilePic: '',
       phoneNumber: ePhone,
       expertise: eExpertise,
       email: eEmail,
@@ -62,20 +62,20 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
   }
 
-  File? _imageFile;
-
-  Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedImage != null) {
-        _imageFile = File(pickedImage.path);
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
+  // File? _imageFile;
+  //
+  // Future<void> _pickImage() async {
+  //   final ImagePicker _picker = ImagePicker();
+  //   final File? feedPickedImage = await _picker.pickImage(source: ImageSource.gallery);
+  //
+  //   setState(() {
+  //     if (feedPickedImage != null) {
+  //       _imageFile = File(feedPickedImage.path);
+  //     } else {
+  //       print('No image selected.');
+  //     }
+  //   });
+  // }
 
 
 
@@ -102,21 +102,21 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.add_photo_alternate),
-                    onPressed: _pickImage,
-                  ),
-                  // Display selected image
-                  _imageFile != null
-                      ? Image.file(_imageFile!)
-                      : Text('No image selected.'),
-                ],
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(10.0),
+            //   child: Column(
+            //     children: [
+            //       IconButton(
+            //         icon: Icon(Icons.add_photo_alternate),
+            //         onPressed: _pickImage,
+            //       ),
+            //       // Display selected image
+            //       _imageFile != null
+            //           ? Image.file(_imageFile!)
+            //           : Text('No image selected.'),
+            //     ],
+            //   ),
+            // ),
 
             Padding(
               padding: const EdgeInsets.all(10.0),

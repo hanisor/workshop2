@@ -1,59 +1,70 @@
-  import 'dart:io';
-  import 'package:cloud_firestore/cloud_firestore.dart';
-  import 'package:flutter/material.dart';
-  import 'package:image_picker/image_picker.dart';
-  import '../constants/constants.dart';
-  import '../model/feedModel.dart';
-  import '../services/databaseServices.dart';
-  import '../services/storageServices.dart';
-  import '../widget/roundedButton.dart';
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../constants/constants.dart';
+import '../model/feedModel.dart';
+import '../services/databaseServices.dart';
+import '../services/storageServices.dart';
+import '../widget/roundedButton.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+class AddFeedPage extends StatefulWidget {
+  final String currentUserId;
 
-  class AddFeedPage extends StatefulWidget {
-    final String currentUserId;
+  const AddFeedPage({Key? key, required this.currentUserId}) : super(key: key);
 
-    const AddFeedPage({Key? key, required this.currentUserId})
-        : super(key: key);
+  @override
+  _AddFeedPageState createState() => _AddFeedPageState();
+}
 
-    @override
-    _AddFeedPageState createState() => _AddFeedPageState();
-  }
+class _AddFeedPageState extends State<AddFeedPage> {
+  late String _feedText;
+  File? _pickedImage;
+  bool _loading = false;
 
-  class _AddFeedPageState extends State<AddFeedPage> {
-    late String _feedText;
-    File? _pickedImage;
-    bool _loading = false;
-
-    handleImageFromGallery() async {
-      try {
+  Future<void> handleImageFromGallery() async {
+    try {
+      final PermissionStatus permissionStatus = await _requestPermission();
+      if (permissionStatus == PermissionStatus.granted) {
         final ImagePicker _picker = ImagePicker();
-        File imageFile = (await _picker.pickImage(source: ImageSource.gallery)) as File;
-        if (imageFile != null) {
+        XFile? pickedImage =
+        await _picker.pickImage(source: ImageSource.gallery);
+        if (pickedImage != null) {
           setState(() {
-            _pickedImage = File(imageFile.path);
+            _pickedImage = File(pickedImage.path);
           });
         }
-      } catch (e) {
-        print(e);
+      } else {
+        // Handle denied permission (show an alert or message)
       }
+    } catch (e) {
+      print(e);
     }
+  }
 
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: AutiTrackColor,
-          centerTitle: true,
-          title: Text(
-            'Feed',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-            ),
+  Future<PermissionStatus> _requestPermission() async {
+    final PermissionStatus permission = await Permission.storage.request();
+    return permission;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: AutiTrackColor,
+        centerTitle: true,
+        title: Text(
+          'Feed',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
           ),
         ),
-        body: Padding(
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
@@ -72,19 +83,20 @@
               _pickedImage == null
                   ? SizedBox.shrink()
                   : Column(
-                children: [
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                        color: AutiTrackColor,
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: FileImage(_pickedImage!),
-                        )),
+                    children: [
+                      SizedBox(height: 20),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: AutiTrackColor,
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: FileImage(_pickedImage!),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 20),
-                ],
-              ),
               GestureDetector(
                 onTap: handleImageFromGallery,
                 child: Container(
@@ -113,21 +125,21 @@
                     _loading = true;
                   });
                   if (_feedText != null && _feedText.isNotEmpty) {
-                    String image;
-                    if (_pickedImage == null) {
-                      image = '';
-                    } else {
-                      image =
+                    String imageUrl = ''; // Default empty URL if no image is selected
+                    if (_pickedImage != null) {
+                      // Upload the image and get the URL
+                      imageUrl =
                       await StorageService.uploadFeedPicture(_pickedImage!);
                     }
                     Feed feed = Feed(
                       text: _feedText,
-                      image: image,
+                      image: imageUrl,
                       authorId: widget.currentUserId,
                       likes: 0,
                       timestamp: Timestamp.fromDate(
                         DateTime.now(),
-                      ), id: '',
+                      ),
+                      id: widget.currentUserId,
                     );
                     DatabaseServices.createFeed(feed);
                     Navigator.pop(context);
@@ -142,6 +154,7 @@
             ],
           ),
         ),
-      );
-    }
+      ),
+    );
   }
+}

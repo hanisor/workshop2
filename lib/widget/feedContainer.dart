@@ -34,7 +34,7 @@ class _FeedContainerState extends State<FeedContainer> {
     }
   }
 
-  likeTweet() {
+  likeFeed() {
     if (_isLiked) {
       DatabaseServices.unlikeFeed(widget.currentUserId, widget.feed);
       setState(() {
@@ -94,18 +94,19 @@ class _FeedContainerState extends State<FeedContainer> {
           widget.feed.image.isEmpty
               ? SizedBox.shrink()
               : Column(
-            children: [
-              SizedBox(height: 15),
-              Container(
-                height: 250,
-                decoration: BoxDecoration(
-                    color: AutiTrackColor,
-                    borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(widget.feed.image),
-                    )),
-              )
+                  children: [
+                    SizedBox(height: 15),
+                    Container(
+                      height: 250,
+                      decoration: BoxDecoration(
+                          color: AutiTrackColor,
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: NetworkImage(widget.feed.image),
+                          ),
+                      ),
+              ),
             ],
           ),
           SizedBox(height: 15),
@@ -119,7 +120,7 @@ class _FeedContainerState extends State<FeedContainer> {
                       _isLiked ? Icons.favorite : Icons.favorite_border,
                       color: _isLiked ? Colors.green[900] : Colors.black,
                     ),
-                    onPressed: likeTweet,
+                    onPressed: likeFeed,
                   ),
                   Text(
                     _likesCount.toString() + ' Likes',
