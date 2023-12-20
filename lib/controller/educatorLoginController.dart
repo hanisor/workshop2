@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
 
 import '../model/educatorModel.dart';
-import '../screen/mainPage.dart';
+import '../screen/mainFeedPage.dart';
 
 
 class EducatorLoginController {
@@ -21,7 +21,7 @@ class EducatorLoginController {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MainPage(currentUserId: currentUserId),
+              builder: (context) => MainFeedPage(currentUserId: currentUserId),
             ),
         );
       }

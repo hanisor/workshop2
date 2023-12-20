@@ -19,8 +19,8 @@ class AddFeedPage extends StatefulWidget {
 }
 
 class _AddFeedPageState extends State<AddFeedPage> {
-  late String _feedText;
-  File? _pickedImage;
+  String _feedText = ''; // Initializing _feedText with an empty string
+  File _pickedImage = '' as File;
   bool _loading = false;
 
   Future<void> handleImageFromGallery() async {
@@ -28,15 +28,14 @@ class _AddFeedPageState extends State<AddFeedPage> {
       final PermissionStatus permissionStatus = await _requestPermission();
       if (permissionStatus == PermissionStatus.granted) {
         final ImagePicker _picker = ImagePicker();
-        XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.gallery);
+        XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
         if (pickedImage != null) {
           setState(() {
             _pickedImage = File(pickedImage.path);
           });
         }
       } else {
-        // Handle denied permission (show an alert or message)
+        print('image is in Xfile');
       }
     } catch (e) {
       print(e);
@@ -44,8 +43,13 @@ class _AddFeedPageState extends State<AddFeedPage> {
   }
 
   Future<PermissionStatus> _requestPermission() async {
-    final PermissionStatus permission = await Permission.storage.request();
-    return permission;
+    final PermissionStatus permissionStatus = await Permission.storage.status;
+    if (permissionStatus != PermissionStatus.granted) {
+      final PermissionStatus result = await Permission.storage.request();
+      return result;
+    } else {
+      return permissionStatus;
+    }
   }
 
   @override
@@ -127,9 +131,21 @@ class _AddFeedPageState extends State<AddFeedPage> {
                   if (_feedText != null && _feedText.isNotEmpty) {
                     String imageUrl = ''; // Default empty URL if no image is selected
                     if (_pickedImage != null) {
-                      // Upload the image and get the URL
-                      imageUrl =
-                      await StorageService.uploadFeedPicture(_pickedImage!);
+                      try {
+                        // Upload the image and get the URL
+                        imageUrl = await StorageService.uploadFeedPicture(_pickedImage!);
+                      } catch (e) {
+                        // Inside the `catch` blocks for image upload and feed creation errors
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to upload image. Please try again.'),
+                            // Adjust duration, styling, and other properties as needed
+                          ),
+                        );
+
+                        print('Image upload error: $e');
+                        // Handle image upload error (show a message to the user or take appropriate action)
+                      }
                     }
                     Feed feed = Feed(
                       text: _feedText,
@@ -141,13 +157,19 @@ class _AddFeedPageState extends State<AddFeedPage> {
                       ),
                       id: widget.currentUserId,
                     );
-                    DatabaseServices.createFeed(feed);
-                    Navigator.pop(context);
+                    try {
+                      // Attempt to create the feed
+                      DatabaseServices.createFeed(feed);
+                      Navigator.pop(context);
+                    } catch (e) {
+                      print('Feed creation error: $e');
+                      // Handle feed creation error (show a message to the user or take appropriate action)
+                    }
                   }
                   setState(() {
                     _loading = false;
                   });
-                },
+                }
               ),
               SizedBox(height: 20),
               _loading ? CircularProgressIndicator() : SizedBox.shrink()

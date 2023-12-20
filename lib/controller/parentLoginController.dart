@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../model/parentModel.dart';
 import '../screen/addFeedPage.dart';
-import '../screen/mainPage.dart';
+import '../screen/mainFeedPage.dart';
 
 class ParentLoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -20,7 +20,7 @@ class ParentLoginController {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MainPage(currentUserId: currentUserId),
+            builder: (context) => MainFeedPage(currentUserId: currentUserId),
           ),
         );
       }
