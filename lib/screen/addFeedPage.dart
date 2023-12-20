@@ -20,7 +20,7 @@ class AddFeedPage extends StatefulWidget {
 
 class _AddFeedPageState extends State<AddFeedPage> {
   String _feedText = ''; // Initializing _feedText with an empty string
-  File _pickedImage = '' as File;
+  File? _pickedImage ;
   bool _loading = false;
 
   Future<void> handleImageFromGallery() async {
