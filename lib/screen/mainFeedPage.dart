@@ -3,7 +3,6 @@ import 'package:workshop_test/model/parentModel.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
 import '../constants/constants.dart';
 import '../model/feedModel.dart';
-import '../model/usermodel.dart';
 import '../services/databaseServices.dart';
 import '../widget/feedContainer.dart';
 
@@ -21,8 +20,7 @@ class MainFeedPage extends StatefulWidget {
 class _MainFeedPageState extends State<MainFeedPage> {
   List _followingFeeds = [];
   bool _loading = false;
-  List<Feed> _allFeeds = [];
-  List<Feed> _mediaFeeds = [];
+
 
   buildFeeds(Feed feed, ParentModel author) {
     return Container(
