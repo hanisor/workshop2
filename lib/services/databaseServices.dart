@@ -117,17 +117,17 @@ class DatabaseServices {
     return userFeeds;
   }
 
-  static Future<List> getHomeFeeds(String currentUserId) async {
-    QuerySnapshot homeFeeds = await feedRefs
-        .doc(currentUserId)
-        .collection('userFeed')
-        .orderBy('timestamp', descending: true)
-        .get();
-
-    List<Feed> followingFeeds =
-    homeFeeds.docs.map((doc) => Feed.fromDoc(doc)).toList();
-    return followingFeeds;
-  }
+  // static Future<List> getHomeFeeds(String currentUserId) async {
+  //   QuerySnapshot homeFeeds = await feedRefs
+  //       .doc(currentUserId)
+  //       .collection('userFeeds')
+  //       .orderBy('timestamp', descending: true)
+  //       .get();
+  //
+  //   List<Feed> followingFeeds =
+  //   homeFeeds.docs.map((doc) => Feed.fromDoc(doc)).toList();
+  //   return followingFeeds;
+  // }
 
   static void likeFeed(String currentUserId, Feed feed) {
     DocumentReference feedDocProfile =

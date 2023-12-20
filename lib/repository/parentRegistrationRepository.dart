@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:workshop_test/Constants/Constants.dart';
 
 import '../model/parentModel.dart';
 
 class ParentRegisterRepository {
-  final CollectionReference parentsCollection =
-  FirebaseFirestore.instance.collection("parents Registration");
+  final CollectionReference parentsCollection = usersRef;
 
   Future<void> registerParent(ParentModel parent) async {
     await parentsCollection.add({

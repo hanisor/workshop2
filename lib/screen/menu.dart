@@ -21,6 +21,7 @@ class _MenuState extends State<Menu> {
       body: [
         MainFeedPage(
           currentUserId: widget.currentUserId,
+          visitedUserId: widget.currentUserId,
         ),
         AddFeedPage(
           currentUserId: widget.currentUserId,

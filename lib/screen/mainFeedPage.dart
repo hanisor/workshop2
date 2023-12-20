@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:workshop_test/model/parentModel.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
-
 import '../constants/constants.dart';
 import '../model/feedModel.dart';
 import '../model/usermodel.dart';
@@ -9,8 +9,10 @@ import '../widget/feedContainer.dart';
 
 class MainFeedPage extends StatefulWidget {
   final String currentUserId;
+  final String visitedUserId;
 
-  const MainFeedPage({required this.currentUserId});
+
+  const MainFeedPage({required this.currentUserId,  required this.visitedUserId});
 
   @override
   _MainFeedPageState createState() => _MainFeedPageState();
@@ -19,8 +21,10 @@ class MainFeedPage extends StatefulWidget {
 class _MainFeedPageState extends State<MainFeedPage> {
   List _followingFeeds = [];
   bool _loading = false;
+  List<Feed> _allFeeds = [];
+  List<Feed> _mediaFeeds = [];
 
-  buildFeeds(Feed feed, UserModel author) {
+  buildFeeds(Feed feed, ParentModel author) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: FeedContainer(
@@ -38,7 +42,7 @@ class _MainFeedPageState extends State<MainFeedPage> {
           future: usersRef.doc(feed.authorId).get(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
-              UserModel author = UserModel.fromDoc(snapshot.data);
+              ParentModel author = ParentModel.fromDoc(snapshot.data);
               return buildFeeds(feed, author);
             } else {
               return SizedBox.shrink();
@@ -53,7 +57,7 @@ class _MainFeedPageState extends State<MainFeedPage> {
       _loading = true;
     });
     List followingFeeds =
-    await DatabaseServices.getHomeFeeds(widget.currentUserId);
+    await DatabaseServices.getUserFeeds(widget.visitedUserId);
     if (mounted) {
       setState(() {
         _followingFeeds = followingFeeds;
@@ -66,6 +70,7 @@ class _MainFeedPageState extends State<MainFeedPage> {
   void initState() {
     super.initState();
     setupFollowingFeeds();
+    //getAllFeeds();
   }
 
   @override
@@ -81,7 +86,8 @@ class _MainFeedPageState extends State<MainFeedPage> {
                     builder: (context) => AddFeedPage(
                       currentUserId: widget.currentUserId,
                     )));
-          },child: Icon(Icons.add), // Icon for the button
+          }, child: const Icon(Icons.add),
+
         ),
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -89,7 +95,6 @@ class _MainFeedPageState extends State<MainFeedPage> {
           centerTitle: true,
           leading: Container(
             height: 40,
-            child: Image.asset('assets/logo_autitrack.png'),
           ),
           title: Text(
             'Home Screen',
@@ -98,17 +103,39 @@ class _MainFeedPageState extends State<MainFeedPage> {
             ),
           ),
         ),
-        body:  ListView(
+        body: RefreshIndicator(
+          onRefresh: () => setupFollowingFeeds(),
+          child: ListView(
             physics: BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
             ),
             children: [
               _loading ? LinearProgressIndicator() : SizedBox.shrink(),
               SizedBox(height: 5),
-
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 5),
+                  Column(
+                    children: _followingFeeds.isEmpty && _loading == false
+                        ? [
+                      SizedBox(height: 5),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        child: Text(
+                          'There is No New Tweets',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                      )
+                    ]
+                        : showFeeds (widget.currentUserId),
+                  ),
                 ],
               )
-          );
+            ],
+          ),
+        ));
   }
 }
-
