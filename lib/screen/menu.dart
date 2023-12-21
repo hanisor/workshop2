@@ -39,7 +39,7 @@ class _MenuState extends State<Menu> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home)),
           BottomNavigationBarItem(icon: Icon(Icons.message)),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications)),
+          BottomNavigationBarItem(icon: Icon(Icons.mood)),
           BottomNavigationBarItem(icon: Icon(Icons.person)),
         ],
       ),

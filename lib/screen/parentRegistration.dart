@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../controller/parentLoginController.dart';
 import '../screen/parentLogin.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-
 import '../controller/parentRegistrationController.dart';
 import '../model/parentModel.dart';
+import '../services/storageServices.dart';
 
 class ParentRegistration extends StatefulWidget {
   @override
@@ -15,7 +14,6 @@ class ParentRegistration extends StatefulWidget {
 }
 
 class _ParentRegistrationState extends State<ParentRegistration> {
-  final _loginController = ParentLoginController(); // Initialize ParentLoginController
   final parentNameEditingController = TextEditingController();
   final parentEmailEditingController = TextEditingController();
   final parentPhoneEditingController  = TextEditingController();
@@ -26,7 +24,8 @@ class _ParentRegistrationState extends State<ParentRegistration> {
 
   final _controller = ParentRegistrationController();
   final Uuid uuid = Uuid();
-
+  File? _imageFile;
+  String imageUrl = '';
 
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
@@ -44,7 +43,7 @@ class _ParentRegistrationState extends State<ParentRegistration> {
     ParentModel parent = ParentModel(
       id : parentId,
       name: pName,
-      profilePic: '',
+      profilePic: imageUrl,
       phoneNumber: pPhone,
       email: pEmail,
       password: pPassword,
@@ -56,20 +55,31 @@ class _ParentRegistrationState extends State<ParentRegistration> {
 
   }
 
-  // File? _imageFile;
-  //
-  // Future<void> _pickImage() async {
-  //   final ImagePicker _picker = ImagePicker();
-  //   final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
-  //
-  //   setState(() {
-  //     if (pickedImage != null) {
-  //       _imageFile = File(pickedImage.path);
-  //     } else {
-  //       print('No image selected.');
-  //     }
-  //   });
-  // }
+
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedImage != null) {
+        _imageFile = File(pickedImage.path);
+
+        // Call the method to upload the image to Firebase Storage
+        StorageService.uploadParentProfilePicture(_imageFile!)
+            .then((uploadedImageUrl) {
+          // Store the returned imageUrl in your state variable and set it to your ParentModel
+          setState(() {
+            imageUrl = uploadedImageUrl; // Assign the uploaded image URL to imageUrl
+          });
+        }).catchError((error) {
+          // Handle any upload errors
+          print('Error uploading image: $error');
+        });
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
 
 
   @override
@@ -95,21 +105,22 @@ class _ParentRegistrationState extends State<ParentRegistration> {
                 "Create your account",
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-            // Padding(
-            //   padding: const EdgeInsets.all(10.0),
-            //   child: Column(
-            //     children: [
-            //       IconButton(
-            //         icon: Icon(Icons.add_photo_alternate),
-            //         onPressed: _pickImage,
-            //       ),
-            //       // Display selected image
-            //       _imageFile != null
-            //           ? Image.file(_imageFile!)
-            //           : Text('No image selected.'),
-            //     ],
-            //   ),
-            // ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.add_photo_alternate),
+                    onPressed: _pickImage,
+
+                  ),
+                  // Display selected image
+                  _imageFile != null
+                      ? Image.file(_imageFile!)
+                      : Text('No image selected.'),
+                ],
+              ),
+            ),
             Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: TextFormField(

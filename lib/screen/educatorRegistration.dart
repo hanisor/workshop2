@@ -7,6 +7,7 @@ import '../model/educatorModel.dart';
 import '../screen/educatorLogin.dart';
 
 import '../controller/educatorRegistrationController.dart';
+import '../services/storageServices.dart';
 
 class EducatorRegistration extends StatefulWidget {
   const EducatorRegistration({super.key});
@@ -28,6 +29,9 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
   final _controller = EducatorRegistrationController();
   final Uuid uuid = Uuid();
+  String imageUrl = '';
+  File? _imageFile;
+
 
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
@@ -41,14 +45,13 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
     String eRePassword = educatorRePassEditingController.text.trim();
     String eRole = "educator";
     String educatorId = uuid.v4(); // Generate a random UUID
-    //String? eprofilePicPath = _imageFile != null ? _imageFile!.path : null;
 
 
 
     EducatorModel educator = EducatorModel(
       id: educatorId, // Assign the 'id' here
       name: eName,
-      profilePic: '',
+      profilePic: imageUrl,
       phoneNumber: ePhone,
       expertise: eExpertise,
       email: eEmail,
@@ -62,21 +65,30 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
   }
 
-  // File? _imageFile;
-  //
-  // Future<void> _pickImage() async {
-  //   final ImagePicker _picker = ImagePicker();
-  //   final File? feedPickedImage = await _picker.pickImage(source: ImageSource.gallery);
-  //
-  //   setState(() {
-  //     if (feedPickedImage != null) {
-  //       _imageFile = File(feedPickedImage.path);
-  //     } else {
-  //       print('No image selected.');
-  //     }
-  //   });
-  // }
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
 
+    setState(() {
+      if (pickedImage != null) {
+        _imageFile = File(pickedImage.path);
+
+        // Call the method to upload the image to Firebase Storage
+        StorageService.uploadEducatorProfilePicture(_imageFile!)
+            .then((uploadedImageUrl) {
+          // Store the returned imageUrl in your state variable and set it to your ParentModel
+          setState(() {
+            imageUrl = uploadedImageUrl; // Assign the uploaded image URL to imageUrl
+          });
+        }).catchError((error) {
+          // Handle any upload errors
+          print('Error uploading image: $error');
+        });
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
 
 
 
@@ -102,21 +114,22 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
 
-            // Padding(
-            //   padding: const EdgeInsets.all(10.0),
-            //   child: Column(
-            //     children: [
-            //       IconButton(
-            //         icon: Icon(Icons.add_photo_alternate),
-            //         onPressed: _pickImage,
-            //       ),
-            //       // Display selected image
-            //       _imageFile != null
-            //           ? Image.file(_imageFile!)
-            //           : Text('No image selected.'),
-            //     ],
-            //   ),
-            // ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.add_photo_alternate),
+                    onPressed: _pickImage,
+
+                  ),
+                  // Display selected image
+                  _imageFile != null
+                      ? Image.file(_imageFile!)
+                      : Text('No image selected.'),
+                ],
+              ),
+            ),
 
             Padding(
               padding: const EdgeInsets.all(10.0),
