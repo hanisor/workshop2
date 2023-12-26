@@ -1,7 +1,9 @@
+/*
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
 import 'package:workshop_test/screen/mainFeedPage.dart';
+import 'package:workshop_test/screen/new.dart';
 import '../constants/constants.dart';
 
 
@@ -21,11 +23,8 @@ class _MenuState extends State<Menu> {
       body: [
         MainFeedPage(
           currentUserId: widget.currentUserId,
-          visitedUserId: widget.currentUserId,
         ),
-        AddFeedPage(
-          currentUserId: widget.currentUserId,
-        ),
+
 
       ].elementAt(_selectedTab),
       bottomNavigationBar: CupertinoTabBar(
@@ -45,4 +44,4 @@ class _MenuState extends State<Menu> {
       ),
     );
   }
-}
+}*/

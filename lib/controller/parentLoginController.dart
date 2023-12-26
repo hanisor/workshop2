@@ -1,26 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import 'package:workshop_test/screen/new.dart';
 import '../model/parentModel.dart';
-import '../screen/addFeedPage.dart';
 import '../screen/mainFeedPage.dart';
 
 class ParentLoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+
   Future<UserCredential?> login(
       BuildContext context, ParentModel parent) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: parent.email,
-        password: parent.password,
+        email: parent.parentEmail,
+        password: parent.parentPassword,
       );
       if (userCredential.user != null) {
         String currentUserId = userCredential.user!.uid; // Assuming uid is the user ID
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MainFeedPage(currentUserId: currentUserId, visitedUserId: currentUserId,),
+            builder: (context) => MainFeedPage(currentUserId: currentUserId),
           ),
         );
       }
@@ -51,4 +52,6 @@ class ParentLoginController {
       },
     );
   }
+
+
 }

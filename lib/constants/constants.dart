@@ -8,7 +8,9 @@ final _fireStore = FirebaseFirestore.instance;
 
 final storageRef = FirebaseStorage.instance.ref();
 
-final usersRef = _fireStore.collection("parents Registration");
+final parentRef = _fireStore.collection("parents");
+
+final eduRef = _fireStore.collection("educators Registration");
 
 
 final feedRefs = _fireStore.collection('feeds');

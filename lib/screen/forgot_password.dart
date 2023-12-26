@@ -6,6 +6,8 @@ import '../screen/parentLogin.dart';
 
 class ForgotPassword extends StatefulWidget {
 
+const ForgotPassword({Key? key}) : super(key: key);
+
 
   @override
   State<ForgotPassword> createState() => _ForgotPasswordState();

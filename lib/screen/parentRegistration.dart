@@ -1,5 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../screen/parentLogin.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -8,7 +8,12 @@ import '../controller/parentRegistrationController.dart';
 import '../model/parentModel.dart';
 import '../services/storageServices.dart';
 
+
 class ParentRegistration extends StatefulWidget {
+
+  const ParentRegistration({Key? key}) : super(key: key);
+
+
   @override
   State<ParentRegistration> createState() => _ParentRegistrationState();
 }
@@ -23,12 +28,13 @@ class _ParentRegistrationState extends State<ParentRegistration> {
   TextEditingController();
 
   final _controller = ParentRegistrationController();
-  final Uuid uuid = Uuid();
   File? _imageFile;
   String imageUrl = '';
 
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
+  String? parentName = FirebaseAuth.instance.currentUser?.email;
+
 
   void createAccount() async {
     String pName = parentNameEditingController.text.trim();
@@ -37,23 +43,35 @@ class _ParentRegistrationState extends State<ParentRegistration> {
     String pPassword = parentPasswordEditingController.text.trim();
     String pRePassword = parentRePassEditingController.text.trim();
     String pRole = "parent";
-    String parentId = uuid.v4(); // Generate a random UUID
 
+    // Ensure _imageFile has been picked before creating the parent
+    if (_imageFile != null) {
+      // Call the method to upload the image to Firebase Storage
+      imageUrl = await StorageService.uploadParentProfilePicture(_imageFile!);
+    }
 
     ParentModel parent = ParentModel(
-      id : parentId,
-      name: pName,
-      profilePic: imageUrl,
-      phoneNumber: pPhone,
-      email: pEmail,
-      password: pPassword,
-      rePassword: pRePassword,
+      parentName: pName,
+      parentProfilePicture: imageUrl,
+      parentPhoneNumber: pPhone,
+      parentEmail: pEmail,
+      parentPassword: pPassword,
+      parentRePassword: pRePassword,
       role: pRole,
     );
 
+    print('Profile Pic: ${parent.parentProfilePicture}'); // Access profilePic from the 'parent' instance
+    print('Name: ${parent.parentName}');
+    print('num: ${parent.parentPhoneNumber}'); // Access profilePic from the 'parent' instance
+    print('email: ${parent.parentEmail}'); // Access name from the 'parent' instance
+    print('pass: ${parent.parentPassword}'); // Access profilePic from the 'parent' instance
+    print('re: ${parent.parentRePassword}'); // Access name from the 'parent' instance
+// Access name from the 'parent' instance
+
+
     await _controller.createAccount(context, parent);
 
-  }
+    }
 
 
   Future<void> _pickImage() async {
@@ -81,6 +99,10 @@ class _ParentRegistrationState extends State<ParentRegistration> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +303,8 @@ class _ParentRegistrationState extends State<ParentRegistration> {
                   TextButton(
                     onPressed: () => Navigator.pop(context,
                         MaterialPageRoute(
-                            builder: (context) => ParentLogin())
+                            builder: (context) => ParentLogin(),
+                        ),
                     ),
                     child: const Text("Login"),
                   ),

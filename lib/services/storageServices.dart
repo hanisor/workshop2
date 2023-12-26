@@ -50,7 +50,7 @@ class StorageService {
         image.absolute.path,
         '$path/img_$photoId.jpg',
         quality: 70,
-      )) as File;
+      )) as File; // error Xfile
       return compressedImage;
     } catch (e) {
       print('Compression error: $e');

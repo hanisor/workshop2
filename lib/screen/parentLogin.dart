@@ -8,6 +8,7 @@ import '../model/parentModel.dart';
 
 class ParentLogin extends StatefulWidget {
 
+  const ParentLogin({Key? key}) : super(key: key);
 
   @override
   State<ParentLogin> createState() => _ParentLoginState();
@@ -27,13 +28,14 @@ class _ParentLoginState extends State<ParentLogin> {
     String ePassword = parentPasswordEditingController.text.trim();
 
     ParentModel parent = ParentModel(
-      email: eEmail,
-      password: ePassword,
-      name: '',
-      profilePic: '',
-      phoneNumber: '',
-      rePassword: '',
+      parentEmail: eEmail,
+      parentPassword: ePassword,
+      parentName: '',
+      parentProfilePicture: '',
+      parentPhoneNumber: '',
+      parentRePassword: '',
       role: '',
+      id: '',
     );
 
     _controller.login(context, parent);
@@ -144,7 +146,8 @@ class _ParentLoginState extends State<ParentLogin> {
                     TextButton(
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(
-                            builder: (context) => ParentRegistration()));
+                            builder: (context) => ParentRegistration()
+                        ));
                       },
                       child: const Text("Register"),
                     ),

@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:workshop_test/screen/addFeedPage.dart';
-
+import 'package:workshop_test/screen/new.dart';
 import '../model/educatorModel.dart';
 import '../screen/mainFeedPage.dart';
 
@@ -21,7 +20,7 @@ class EducatorLoginController {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MainFeedPage(currentUserId: currentUserId, visitedUserId: currentUserId,),
+              builder: (context) => MainFeedPage(currentUserId: currentUserId),
             ),
         );
       }

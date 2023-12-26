@@ -10,6 +10,63 @@
       "client_info": {
         "mobilesdk_app_id": "1:168690051295:android:e6c9c5f9df38d49a60616a",
         "android_client_info": {
+          "package_name": "com.example.project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6BEoIKN-h-QRgikwVkFLjwjxLBqRTdM4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168690051295:android:ca527ff2085cb2fa60616a",
+        "android_client_info": {
+          "package_name": "com.example.workshop2_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6BEoIKN-h-QRgikwVkFLjwjxLBqRTdM4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168690051295:android:4df8e9e78712087960616a",
+        "android_client_info": {
+          "package_name": "com.example.workshop3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6BEoIKN-h-QRgikwVkFLjwjxLBqRTdM4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168690051295:android:ff2e64253a4f9e8860616a",
+        "android_client_info": {
           "package_name": "com.example.workshop_test"
         }
       },

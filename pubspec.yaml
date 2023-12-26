@@ -38,7 +38,6 @@ dependencies:
   firebase_core: ^2.21.0
   firebase_auth: ^4.12.1
   firebase_database: ^10.3.4
-  cloud_firestore: ^4.13.1
   get: ^4.6.6
   intl: ^0.17.0
   fluttertoast: ^8.2.4
@@ -50,6 +49,7 @@ dependencies:
   flutter_image_compress: ^2.1.0
   permission_handler: ^11.1.0
   firebase_app_check: ^0.2.1+8
+  cloud_firestore: ^4.13.6
 
 
 dev_dependencies:
@@ -80,6 +80,8 @@ flutter:
     - assets/parent.jpg
     - assets/educator.jpg
     - assets/forgot password.png
+    - assets/placeholder.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

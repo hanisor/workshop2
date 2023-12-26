@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../model/parentModel.dart';
-import '../repository/parentRegistrationRepository.dart';
+import '../repository/parentRegisterRepository.dart';
 
 class ParentRegistrationController {
   final ParentRegisterRepository _registrationRepository = ParentRegisterRepository();
@@ -34,23 +34,23 @@ class ParentRegistrationController {
 
   // Method to validate the form fields
   bool _validateFields(ParentModel parent) {
-    return parent.name.trim().isEmpty ||
-        parent.email.trim().isEmpty ||
-        parent.password.trim().isEmpty ||
-        parent.rePassword.trim().isEmpty;
+    return parent.parentName.trim().isEmpty ||
+        parent.parentEmail.trim().isEmpty ||
+        parent.parentPassword.trim().isEmpty ||
+        parent.parentRePassword.trim().isEmpty;
   }
 
   // Method to handle the registration process
   Future<UserCredential?> createAccount(BuildContext context, ParentModel parent) async {
     if (_validateFields(parent)) {
       _showRegistrationFailedDialog(context, 'Please fill all the details');
-    } else if (parent.password.trim() != parent.rePassword.trim()) {
+    } else if (parent.parentPassword.trim() != parent.parentRePassword.trim()) {
       _showRegistrationFailedDialog(context, 'The passwords do not match');
     } else {
       try {
         UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: parent.email.trim(),
-          password: parent.password.trim(),
+          email: parent.parentEmail.trim(),
+          password: parent.parentPassword.trim(),
         );
 
         await _registrationRepository.registerParent(parent);

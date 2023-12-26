@@ -1,79 +1,84 @@
+  import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:workshop_test/model/parentModel.dart';
-import 'package:workshop_test/screen/addFeedPage.dart';
-import '../constants/constants.dart';
-import '../model/feedModel.dart';
-import '../services/databaseServices.dart';
-import '../widget/feedContainer.dart';
+  import 'package:workshop_test/model/parentModel.dart';
+  import 'package:workshop_test/screen/addFeedPage.dart';
+  import '../constants/constants.dart';
+  import '../model/feedModel.dart';
+  import '../services/databaseServices.dart';
+  import '../widget/feedContainer.dart';
 
-class MainFeedPage extends StatefulWidget {
-  final String currentUserId;
-  final String visitedUserId;
-
-
-  const MainFeedPage({required this.currentUserId,  required this.visitedUserId});
-
-  @override
-  _MainFeedPageState createState() => _MainFeedPageState();
-}
-
-class _MainFeedPageState extends State<MainFeedPage> {
-  List _followingFeeds = [];
-  bool _loading = false;
+  class MainFeedPage extends StatefulWidget {
+    final String currentUserId;
+     //final String visitedUserId;
 
 
-  buildFeeds(Feed feed, ParentModel author) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15),
-      child: FeedContainer(
-        feed: feed,
-        author: author,
-        currentUserId: widget.currentUserId,
-      ),
-    );
+    const MainFeedPage({required this.currentUserId});
+
+    @override
+    _MainFeedPageState createState() => _MainFeedPageState();
   }
 
-  showFeeds(String currentUserId) {
-    List<Widget> followingFeedsList = [];
-    for (Feed feed in _followingFeeds) {
-      followingFeedsList.add(FutureBuilder(
-          future: usersRef.doc(feed.authorId).get(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.hasData) {
-              ParentModel author = ParentModel.fromDoc(snapshot.data);
-              return buildFeeds(feed, author);
-            } else {
-              return SizedBox.shrink();
-            }
-          }));
+  class _MainFeedPageState extends State<MainFeedPage> {
+    List _followingFeeds = [];
+    bool _loading = false;
+    int _selectedTabIndex = 0;
+    late List<Widget> _pages;
+
+
+    buildFeeds(Feed feed, ParentModel parent) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        child: FeedContainer(
+          feed: feed,
+          parent: parent,
+          currentUserId: widget.currentUserId,
+        ),
+      );
     }
-    return followingFeedsList;
-  }
 
-  setupFollowingFeeds() async {
-    setState(() {
-      _loading = true;
-    });
-    List followingFeeds =
-    await DatabaseServices.getUserFeeds(widget.visitedUserId);
-    if (mounted) {
+    showFeeds(String currentUserId) {
+      List<Widget> followingFeedsList = [];
+      for (Feed feed in _followingFeeds) {
+        followingFeedsList.add(FutureBuilder(
+            future: parentRef.doc(feed.authorId).get(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData) {
+                ParentModel author = ParentModel.fromDoc(snapshot.data);
+                //author.id = feed.authorId;
+                return buildFeeds(feed, author);
+              } else {
+                return SizedBox.shrink();
+              }
+            }));
+      }
+      return followingFeedsList;
+    }
+
+
+    setupFollowingFeeds() async {
       setState(() {
-        _followingFeeds = followingFeeds;
-        _loading = false;
+        _loading = true;
       });
+      List followingFeeds =
+      await DatabaseServices.getUserFeeds(widget.currentUserId);
+      if (mounted) {
+        setState(() {
+          _followingFeeds = followingFeeds;
+          _loading = false;
+        });
+      }
     }
-  }
 
-  @override
-  void initState() {
-    super.initState();
-    setupFollowingFeeds();
-    //getAllFeeds();
-  }
+    @override
+    void initState() {
+      super.initState();
+      setupFollowingFeeds();
+      //getAllFeeds();
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
         backgroundColor: Colors.white,
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.white,
@@ -81,9 +86,10 @@ class _MainFeedPageState extends State<MainFeedPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => AddFeedPage(
-                      currentUserId: widget.currentUserId,
-                    )));
+                    builder: (context) =>
+                        AddFeedPage(
+                          currentUserId: widget.currentUserId,
+                        )));
           }, child: const Icon(Icons.add),
 
         ),
@@ -128,12 +134,38 @@ class _MainFeedPageState extends State<MainFeedPage> {
                         ),
                       )
                     ]
-                        : showFeeds (widget.currentUserId),
+                        : showFeeds(widget.currentUserId),
                   ),
+
                 ],
               )
             ],
+
           ),
-        ));
+
+        ),
+      );
+    }
+
+    @override
+    Widget buildMenu(BuildContext context) {
+      return Scaffold(
+        body: _pages[_selectedTabIndex], // Show the selected page
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedTabIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedTabIndex = index; // Update the selected tab index
+            });
+          },
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Menu'),
+            // Add other bottom navigation items as needed
+          ],
+        ),
+      );
+    }
   }
-}
+
+

@@ -8,13 +8,15 @@ class Feed {
   Timestamp timestamp;
   int likes;
 
+
   Feed(
       {required this.id,
         required this.authorId,
         required this.text,
         required this.image,
         required this.timestamp,
-        required this.likes});
+        required this.likes,
+      });
 
   factory Feed.fromDoc(DocumentSnapshot doc) {
     return Feed(
