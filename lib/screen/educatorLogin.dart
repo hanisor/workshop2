@@ -25,14 +25,14 @@ class _EducatorLogin extends State<EducatorLogin> {
     String ePassword = educatorPasswordEditingController.text.trim();
 
     EducatorModel educator = EducatorModel(
-      email: eEmail,
-      password: ePassword,
-      name: '',
-      profilePic: '',
-      expertise: '',
-      phoneNumber: '',
-      rePassword: '',
-      role: '',
+      educatorEmail: eEmail,
+      educatorPassword: ePassword,
+      educatorName: '',
+      educatorProfilePicture: '',
+      educatorExpertise: '',
+      educatorPhoneNumber: '',
+      educatorRePassword: '',
+      educatorRole: '',
     );
 
     _controller.login(context, educator);

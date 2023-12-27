@@ -50,6 +50,7 @@ dependencies:
   permission_handler: ^11.1.0
   firebase_app_check: ^0.2.1+8
   cloud_firestore: ^4.13.6
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:
@@ -80,7 +81,7 @@ flutter:
     - assets/parent.jpg
     - assets/educator.jpg
     - assets/forgot password.png
-    - assets/placeholder.png
+    - assets/profilePic.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

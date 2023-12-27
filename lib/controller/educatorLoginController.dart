@@ -1,28 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:workshop_test/screen/new.dart';
-import '../model/educatorModel.dart';
-import '../screen/mainFeedPage.dart';
-
+import 'package:workshop_test/model/educatorModel.dart';
+import 'package:workshop_test/model/parentModel.dart';
+import 'package:workshop_test/screen/mainFeedPage.dart';
 
 class EducatorLoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? uid = FirebaseAuth.instance.currentUser?.uid;
+
 
   Future<UserCredential?> login(
       BuildContext context, EducatorModel educator) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: educator.email,
-        password: educator.password,
+        email: educator.educatorEmail,
+        password: educator.educatorPassword,
       );
       if (userCredential.user != null) {
-        String currentUserId = userCredential.user!.uid; // Assuming uid is the user ID
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MainFeedPage(currentUserId: currentUserId),
-            ),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainFeedPage(currentUserId: uid),
+          ),
         );
+
       }
       return userCredential;
     } on FirebaseAuthException catch (ex) {

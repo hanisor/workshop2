@@ -7,6 +7,7 @@ import '../screen/mainFeedPage.dart';
 
 class ParentLoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? uid = FirebaseAuth.instance.currentUser?.uid;
 
 
   Future<UserCredential?> login(
@@ -17,14 +18,14 @@ class ParentLoginController {
         password: parent.parentPassword,
       );
       if (userCredential.user != null) {
-        String currentUserId = userCredential.user!.uid; // Assuming uid is the user ID
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MainFeedPage(currentUserId: currentUserId),
+            builder: (context) => MainFeedPage(currentUserId: uid),
           ),
         );
-      }
+
+    }
       return userCredential;
     } on FirebaseAuthException catch (ex) {
       _showLoginFailedDialog(context);

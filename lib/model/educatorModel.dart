@@ -1,23 +1,41 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class EducatorModel {
   final String? id;
-  final String name;
-  final String? profilePic;
-  final String expertise;
-  final String phoneNumber;
-  final String email;
-  final String password;
-  final String rePassword;
-  final String role;
+  final String educatorName;
+  final String? educatorProfilePicture;
+  final String educatorExpertise;
+  final String educatorPhoneNumber;
+  final String educatorEmail;
+  final String educatorPassword;
+  final String educatorRePassword;
+  final String educatorRole;
 
   const EducatorModel ({
     this.id,
-    required this.name,
-    required this.profilePic,
-    required this.expertise,
-    required this.phoneNumber,
-    required this.email,
-    required this.password,
-    required this.rePassword,
-    required this.role,
+    required this.educatorName,
+    required this.educatorProfilePicture,
+    required this.educatorExpertise,
+    required this.educatorPhoneNumber,
+    required this.educatorEmail,
+    required this.educatorPassword,
+    required this.educatorRePassword,
+    required this.educatorRole,
   });
+
+  factory EducatorModel.fromDoc(DocumentSnapshot doc) {
+    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+
+    return EducatorModel(
+      id: doc.id,
+      educatorName: data?['educatorName'] ?? '', // Use null-aware operator to handle null values
+      educatorProfilePicture: data?['educatorProfilePicture'] ?? '',
+      educatorExpertise: data?['educatorExpertise'] ?? '',
+      educatorPhoneNumber: data?['educatorPhoneNumber'] ?? '',
+      educatorEmail: data?['educatorEmail'] ?? '',
+      educatorPassword: data?['educatorPassword'] ?? '',
+      educatorRePassword: data?['educatorRePassword'] ?? '',
+      educatorRole: data?['educatorRole'] ?? '',
+    );
+  }
 }

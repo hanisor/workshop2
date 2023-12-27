@@ -8,13 +8,13 @@ import '../services/databaseServices.dart';
 class FeedContainer extends StatefulWidget {
   final Feed feed;
   final ParentModel parent;
-  final String currentUserId;
+  //final String currentUserId;
 
   const FeedContainer({
     Key? key,
     required this.feed,
     required this.parent,
-    required this.currentUserId,
+    //required this.currentUserId,
   }) : super(key: key);
 
   @override
@@ -29,7 +29,7 @@ class _FeedContainerState extends State<FeedContainer> {
 
   initFeedLikes() async {
     bool isLiked =
-    await DatabaseServices.isLikeFeed(widget.currentUserId, widget.feed);
+    await DatabaseServices.isLikeFeed(widget.parent.id, widget.feed);
     if (mounted) {
       setState(() {
         _isLiked = isLiked;
@@ -39,13 +39,13 @@ class _FeedContainerState extends State<FeedContainer> {
 
   likeFeed() {
     if (_isLiked) {
-      DatabaseServices.unlikeFeed(widget.currentUserId, widget.feed);
+      DatabaseServices.unlikeFeed(widget.parent.id, widget.feed);
       setState(() {
         _isLiked = false;
         _likesCount--;
       });
     } else {
-      DatabaseServices.likeFeed(widget.currentUserId, widget.feed);
+      DatabaseServices.likeFeed(widget.parent.id, widget.feed);
       setState(() {
         _isLiked = true;
         _likesCount++;
@@ -60,6 +60,7 @@ class _FeedContainerState extends State<FeedContainer> {
     // initParentModel();// Corrected method name
 
     // Debugging prints to check profilePic and name
+    print('Id: ${widget.feed.authorId}');
     print('Profile Pic: ${widget.parent.parentProfilePicture}');
     print('Name: ${widget.parent.parentName}');
     print('text: ${widget.feed.text}');
@@ -106,7 +107,7 @@ class _FeedContainerState extends State<FeedContainer> {
                 backgroundImage: widget.parent != null &&
                     widget.parent.parentProfilePicture.isNotEmpty
                     ? NetworkImage(widget.parent.parentProfilePicture)
-                    : AssetImage('assets/placeholder.png') as ImageProvider<Object>,
+                    : AssetImage('assets/profilePic.png') as ImageProvider<Object>,
 
               ),
 

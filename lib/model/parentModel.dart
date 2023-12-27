@@ -34,27 +34,16 @@ class ParentModel {
       role: data?['role'] ?? '',
     );
   }
-/*  static ParentModel fromFirestore(Map<String, dynamic> firestoreData) {
-    return ParentModel(
-      parentName: firestoreData['parentName'] ?? '', // Use null-aware operator to handle null values
-      parentProfilePicture: firestoreData['parentProfilePicture'] ?? '',
-      parentPhoneNumber: firestoreData['parentPhoneNumber'] ?? '',
-      parentEmail: firestoreData['parentEmail'] ?? '',
-      parentPassword: firestoreData['parentPassword'] ?? '',
-      parentRePassword: firestoreData['parentRePassword'] ?? '',
-      role: firestoreData['role'] ?? '',
-    );
-  }*/
 
-  Map<String, dynamic> toMap() {
-    return {
-      'parentName': parentName,
-      'parentProfilePicture': parentProfilePicture,
-      'parentPhoneNumber': parentPhoneNumber,
-      'parentEmail': parentEmail,
-      'parentPassword': parentPassword,
-      'parentRePassword': parentRePassword,
-      'role': role,
-    };
-  }
+  // Map<String, dynamic> toMap() {
+  //   return {
+  //     'parentName': parentName,
+  //     'parentProfilePicture': parentProfilePicture,
+  //     'parentPhoneNumber': parentPhoneNumber,
+  //     'parentEmail': parentEmail,
+  //     'parentPassword': parentPassword,
+  //     'parentRePassword': parentRePassword,
+  //     'role': role,
+  //   };
+  // }
 }

@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Feed {
-  String id;
-  String authorId;
+  String? id;
+  String? authorId;
   String text;
   String image;
   Timestamp timestamp;
@@ -10,8 +10,8 @@ class Feed {
 
 
   Feed(
-      {required this.id,
-        required this.authorId,
+      { this.id,
+        this.authorId,
         required this.text,
         required this.image,
         required this.timestamp,

@@ -1,11 +1,10 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:uuid/uuid.dart';
-import 'package:workshop_test/controller/educatorLoginController.dart';
 import '../model/educatorModel.dart';
 import '../screen/educatorLogin.dart';
-
 import '../controller/educatorRegistrationController.dart';
 import '../services/storageServices.dart';
 
@@ -17,7 +16,6 @@ class EducatorRegistration extends StatefulWidget {
 }
 
 class _EducatorRegistrationState extends State<EducatorRegistration> {
-  final _registerController = EducatorRegistrationController(); // Initialize ParentLoginController
   final educatorNameEditingController = TextEditingController();
   final educatorEmailEditingController = TextEditingController();
   final educatorPhoneEditingController = TextEditingController();
@@ -28,13 +26,14 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
   TextEditingController();
 
   final _controller = EducatorRegistrationController();
-  final Uuid uuid = Uuid();
   String imageUrl = '';
   File? _imageFile;
 
 
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
+  String? uid = FirebaseAuth.instance.currentUser?.uid;
+
 
   void createAccount() async {
     String eName = educatorNameEditingController.text.trim();
@@ -44,26 +43,53 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
     String ePassword = educatorPasswordEditingController.text.trim();
     String eRePassword = educatorRePassEditingController.text.trim();
     String eRole = "educator";
-    String educatorId = uuid.v4(); // Generate a random UUID
+    String? eId = uid;
 
-
+    // Ensure _imageFile has been picked before creating the parent
+    if (_imageFile != null) {
+      // Call the method to upload the image to Firebase Storage
+      imageUrl = await StorageService.uploadParentProfilePicture(_imageFile!);
+    }
 
     EducatorModel educator = EducatorModel(
-      id: educatorId, // Assign the 'id' here
-      name: eName,
-      profilePic: imageUrl,
-      phoneNumber: ePhone,
-      expertise: eExpertise,
-      email: eEmail,
-      password: ePassword,
-      rePassword: eRePassword,
-      role: eRole,
+      id: eId, // Assign the 'id' here
+      educatorName: eName,
+      educatorProfilePicture: imageUrl,
+      educatorPhoneNumber: ePhone,
+      educatorExpertise: eExpertise,
+      educatorEmail: eEmail,
+      educatorPassword: ePassword,
+      educatorRePassword: eRePassword,
+      educatorRole: eRole,
     );
 
 
     await _controller.createAccount(context, educator);
 
+    try {
+      String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      // Access Firestore collection reference for parents or users
+      CollectionReference parentsCollection = FirebaseFirestore.instance.collection('educators');
+
+      // Add the parent data to Firestore with the UID as the document ID
+      await parentsCollection.doc(uid).set({
+        'educatorName': eName,
+        'educatorProfilePicture': imageUrl,
+        'educatorPhoneNumber': ePhone,
+        'educatorEmail': eEmail,
+        'educatorPassword': ePassword,
+        'educatorRePassword': eRePassword,
+        'educatorRole': eRole,
+      });
+
+      // Proceed with navigation or any other operations after successful document creation
+    } catch (error) {
+      // Handle any potential errors
+      print('Error creating parent document: $error');
+    }
+
   }
+
 
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
@@ -90,7 +116,10 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
     });
   }
 
-
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

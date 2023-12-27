@@ -1,10 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../model/parentModel.dart';
-import '../repository/parentRegisterRepository.dart';
 
 class ParentRegistrationController {
-  final ParentRegisterRepository _registrationRepository = ParentRegisterRepository();
 
   // Method to display a generic error dialog
   void _showErrorDialog(BuildContext context, String title, String content) {
@@ -52,8 +50,6 @@ class ParentRegistrationController {
           email: parent.parentEmail.trim(),
           password: parent.parentPassword.trim(),
         );
-
-        await _registrationRepository.registerParent(parent);
 
         if (userCredential.user != null) {
           Navigator.pop(context);

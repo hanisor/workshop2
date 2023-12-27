@@ -64,4 +64,8 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation 'com.google.firebase:firebase-appcheck:VERSION_NUMBER'
+    implementation 'com.google.firebase:firebase-appcheck-safetynet:VERSION_NUMBER' // For SafetyNet provider (recommended)
+
+}

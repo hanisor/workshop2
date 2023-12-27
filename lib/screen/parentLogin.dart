@@ -24,12 +24,12 @@ class _ParentLoginState extends State<ParentLogin> {
   final _controller = ParentLoginController();
 
   void login() async {
-    String eEmail = parentEmailEditingController.text.trim();
-    String ePassword = parentPasswordEditingController.text.trim();
+    String pEmail = parentEmailEditingController.text.trim();
+    String pPassword = parentPasswordEditingController.text.trim();
 
     ParentModel parent = ParentModel(
-      parentEmail: eEmail,
-      parentPassword: ePassword,
+      parentEmail: pEmail,
+      parentPassword: pPassword,
       parentName: '',
       parentProfilePicture: '',
       parentPhoneNumber: '',
@@ -39,12 +39,12 @@ class _ParentLoginState extends State<ParentLogin> {
     );
 
     _controller.login(context, parent);
-  }
-
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.lightGreen[100],
+
 
         appBar: AppBar(
             backgroundColor: (Colors.lightGreen[100])),

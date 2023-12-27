@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../screen/parentLogin.dart';
@@ -10,9 +11,6 @@ import '../services/storageServices.dart';
 
 
 class ParentRegistration extends StatefulWidget {
-
-  const ParentRegistration({Key? key}) : super(key: key);
-
 
   @override
   State<ParentRegistration> createState() => _ParentRegistrationState();
@@ -33,7 +31,7 @@ class _ParentRegistrationState extends State<ParentRegistration> {
 
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
-  String? parentName = FirebaseAuth.instance.currentUser?.email;
+  String? uid = FirebaseAuth.instance.currentUser?.uid;
 
 
   void createAccount() async {
@@ -43,6 +41,7 @@ class _ParentRegistrationState extends State<ParentRegistration> {
     String pPassword = parentPasswordEditingController.text.trim();
     String pRePassword = parentRePassEditingController.text.trim();
     String pRole = "parent";
+    String? pId = uid;
 
     // Ensure _imageFile has been picked before creating the parent
     if (_imageFile != null) {
@@ -58,8 +57,10 @@ class _ParentRegistrationState extends State<ParentRegistration> {
       parentPassword: pPassword,
       parentRePassword: pRePassword,
       role: pRole,
+      id: pId,
     );
 
+    print('Pid: ${parent.id}'); // Access profilePic from the 'parent' instance
     print('Profile Pic: ${parent.parentProfilePicture}'); // Access profilePic from the 'parent' instance
     print('Name: ${parent.parentName}');
     print('num: ${parent.parentPhoneNumber}'); // Access profilePic from the 'parent' instance
@@ -70,6 +71,28 @@ class _ParentRegistrationState extends State<ParentRegistration> {
 
 
     await _controller.createAccount(context, parent);
+
+    try {
+      String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      // Access Firestore collection reference for parents or users
+      CollectionReference parentsCollection = FirebaseFirestore.instance.collection('parents');
+
+      // Add the parent data to Firestore with the UID as the document ID
+      await parentsCollection.doc(uid).set({
+        'parentName': pName,
+        'parentProfilePicture': imageUrl,
+        'parentPhoneNumber': pPhone,
+        'parentEmail': pEmail,
+        'parentPassword': pPassword,
+        'parentRePassword': pRePassword,
+        'role': pRole,
+      });
+
+      // Proceed with navigation or any other operations after successful document creation
+    } catch (error) {
+      // Handle any potential errors
+      print('Error creating parent document: $error');
+    }
 
     }
 

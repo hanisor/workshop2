@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
   import '../model/feedModel.dart';
   import '../services/databaseServices.dart';
   import '../widget/feedContainer.dart';
+  import 'package:shared_preferences/shared_preferences.dart';
+
 
   class MainFeedPage extends StatefulWidget {
-    final String currentUserId;
-     //final String visitedUserId;
+    final String? currentUserId;
 
 
     const MainFeedPage({required this.currentUserId});
@@ -23,6 +24,25 @@ import 'package:flutter/material.dart';
     bool _loading = false;
     int _selectedTabIndex = 0;
     late List<Widget> _pages;
+    late SharedPreferences _prefs;
+
+
+    Feed? get feed {
+      if (_followingFeeds.isNotEmpty) {
+        return _followingFeeds.first; // Return the first feed from the list
+      } else {
+        return null; // Return null if the list is empty
+      }
+    }
+
+    ParentModel? get parent {
+      // Assuming parent data is associated with the first feed in the list
+      if (_followingFeeds.isNotEmpty) {
+        return _followingFeeds.first.parent; // Access parent from the first feed
+      } else {
+        return null; // Return null if the list is empty
+      }
+    }
 
 
     buildFeeds(Feed feed, ParentModel parent) {
@@ -31,12 +51,12 @@ import 'package:flutter/material.dart';
         child: FeedContainer(
           feed: feed,
           parent: parent,
-          currentUserId: widget.currentUserId,
+          //currentUserId: widget.currentUserId,
         ),
       );
     }
 
-    showFeeds(String currentUserId) {
+    showFeeds(String? currentUserId) {
       List<Widget> followingFeedsList = [];
       for (Feed feed in _followingFeeds) {
         followingFeedsList.add(FutureBuilder(
@@ -44,7 +64,7 @@ import 'package:flutter/material.dart';
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
                 ParentModel author = ParentModel.fromDoc(snapshot.data);
-                //author.id = feed.authorId;
+                author.id = feed.authorId;
                 return buildFeeds(feed, author);
               } else {
                 return SizedBox.shrink();
@@ -69,12 +89,26 @@ import 'package:flutter/material.dart';
       }
     }
 
+
     @override
     void initState() {
       super.initState();
-      setupFollowingFeeds();
-      //getAllFeeds();
+      _loadFeedData();
     }
+
+    Future<void> _loadFeedData() async {
+      _prefs = await SharedPreferences.getInstance();
+      final savedFeedIds = _prefs.getStringList('following_feeds') ?? [];
+      setState(() {
+        _followingFeeds = savedFeedIds;
+      });
+    }
+
+    Future<void> _saveFeedData(List<String> feedIds) async {
+      _prefs = await SharedPreferences.getInstance();
+      await _prefs.setStringList('following_feeds', feedIds);
+    }
+
 
     @override
     Widget build(BuildContext context) {
