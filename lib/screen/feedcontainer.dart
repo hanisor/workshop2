@@ -1,48 +1,40 @@
-import 'dart:convert';
-
+/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_test/constants/constants.dart';
 import 'package:workshop_test/controller/commentController.dart';
+import 'package:workshop_test/model/educatorModel.dart';
 import '../model/commentModel.dart';
 import '../model/feedModel.dart';
-import '../model/parentModel.dart';
 import '../services/databaseServices.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-
-class FeedContainer extends StatefulWidget {
+class FeedContainerEdu extends StatefulWidget {
   final Feed feed;
-  final ParentModel parent;
   final String? currentUserId;
-  final List<User> users;
+  final List<User> users; // Include the list of users here
 
-  const FeedContainer({
+  const FeedContainerEdu({
     Key? key,
     required this.feed,
-    required this.parent,
     required this.currentUserId,
     required this.users, // Pass the list of users
 
   }) : super(key: key);
 
   @override
-  _FeedContainerState createState() => _FeedContainerState();
+  _FeedContainerEduState createState() => _FeedContainerEduState();
 }
 
-class _FeedContainerState extends State<FeedContainer> {
+class _FeedContainerEduState extends State<FeedContainerEdu> {
   int _likesCount = 0;
   bool _isLiked = false;
   final _commentController = TextEditingController();
   final List<Comment> _comments = [];
-  List<Comment> _allComments = []; // List to store fetched comments
-  late SharedPreferences _prefs;
-
 
   initFeedLikes() async {
     bool isLiked =
-    await DatabaseServices.isLikeFeed(widget.parent.id, widget.feed);
+    await DatabaseServices.isLikeFeed(widget.currentUserId, widget.feed);
     if (mounted) {
       setState(() {
         _isLiked = isLiked;
@@ -52,13 +44,13 @@ class _FeedContainerState extends State<FeedContainer> {
 
   likeFeed() {
     if (_isLiked) {
-      DatabaseServices.unlikeFeed(widget.parent.id, widget.feed);
+      DatabaseServices.unlikeFeed(widget.currentUserId, widget.feed);
       setState(() {
         _isLiked = false;
         _likesCount--;
       });
     } else {
-      DatabaseServices.likeFeed(widget.parent.id, widget.feed);
+      DatabaseServices.likeFeed(widget.currentUserId, widget.feed);
       setState(() {
         _isLiked = true;
         _likesCount++;
@@ -66,67 +58,23 @@ class _FeedContainerState extends State<FeedContainer> {
     }
   }
 
-  // Initialize shared preferences
-  void _initializeSharedPreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-    // Load comments from shared preferences
-    _loadComments();
-  }
-
-  // Save comments to shared preferences
-  void _saveComments() {
-    String commentsJson = jsonEncode(_comments.map((comment) => comment.toJson()).toList());
-    _prefs.setString('comments', commentsJson);
-  }
-
-  // Load comments from shared preferences
-  void _loadComments() {
-    String? commentsJson = _prefs.getString('comments');
-    if (commentsJson != null && commentsJson.isNotEmpty) {
-      List<dynamic> commentsData = jsonDecode(commentsJson);
-      List<Comment> loadedComments = commentsData.map((data) => Comment.fromJson(data)).toList();
-      setState(() {
-        _comments.clear();
-        _comments.addAll(loadedComments);
-      });
-    }
-  }
-
   @override
   void dispose() {
     _commentController.dispose();
-    _saveComments();
-    super.dispose();  }
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     _likesCount = widget.feed.likes;
-    _initializeSharedPreferences();
 
     // Debugging prints to check profilePic and name
     print('Id: ${widget.feed.authorId}');
-    print('Profile Pic: ${widget.parent.parentProfilePicture}');
-    print('Name: ${widget.parent.parentName}');
     print('text: ${widget.feed.text}');
     print('image: ${widget.feed.image}');
 
     initFeedLikes();
-    _fetchComments();
-
-  }
-
-  void _fetchComments() async {
-    try {
-      List<Comment> comments = await CommentController.fetchCommentsForFeed(widget.feed.id);
-      setState(() {
-        _allComments = comments;
-        print ("comment: $_allComments");
-      });
-    } catch (e) {
-      // Handle errors, e.g., print or show an error message
-      print('Error fetching comments: $e');
-    }
   }
 
   @override
@@ -144,15 +92,15 @@ class _FeedContainerState extends State<FeedContainer> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundImage: widget.parent != null &&
-                    widget.parent.parentProfilePicture.isNotEmpty
-                    ? NetworkImage(widget.parent.parentProfilePicture)
+                backgroundImage: widget.edu != null &&
+                    widget.edu.educatorProfilePicture.isNotEmpty
+                    ? NetworkImage(widget.edu.educatorProfilePicture)
                     : AssetImage('assets/profilePic.png') as ImageProvider<
                     Object>,
               ),
               SizedBox(width: 10),
               Text(
-                widget.parent.parentName,
+                widget.edu.educatorName,
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
@@ -170,21 +118,21 @@ class _FeedContainerState extends State<FeedContainer> {
           widget.feed.image.isEmpty
               ? SizedBox.shrink()
               : Column(
-                  children: [
-                    SizedBox(height: 15),
-                    Container(
-                      height: 250,
-                      decoration: BoxDecoration(
-                        color: AutiTrackColor,
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: NetworkImage(widget.feed.image),
-                        ),
-                      ),
-                    ),
-                  ],
+            children: [
+              SizedBox(height: 15),
+              Container(
+                height: 250,
+                decoration: BoxDecoration(
+                  color: AutiTrackColor,
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: NetworkImage(widget.feed.image),
+                  ),
                 ),
+              ),
+            ],
+          ),
           SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -218,10 +166,10 @@ class _FeedContainerState extends State<FeedContainer> {
           ElevatedButton(
             onPressed: () async {
               final newComment = Comment(
-                text: _commentController.text,
-                timestamp: Timestamp.fromDate(DateTime.now()),
-                authorId: widget.currentUserId,
-                feedId: widget.feed.id
+                  text: _commentController.text,
+                  timestamp: Timestamp.fromDate(DateTime.now()),
+                  authorId: widget.currentUserId,
+                  feedId: widget.feed.id
               );
 
               setState(() {
@@ -234,40 +182,7 @@ class _FeedContainerState extends State<FeedContainer> {
             child: Text('Submit Comment'),
           ),
 
-          Column(
-            children: _allComments.map((comment) {
-              return ListTile(
-                title: Text(comment.text),
-
-                    
-              );
-            }).toList(),
-          ),
-
-          Column(
-            children: _allComments.map((comment) {
-              return ListTile(
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                    // Use the appropriate profile picture here
-                    widget.parent != null && widget.parent.parentProfilePicture.isNotEmpty
-                        ? widget.parent.parentProfilePicture
-                        : 'assets/profilePic.png',
-                  ),
-                ),
-                title: Text(
-                  comment.text,
-                  style: const TextStyle(fontSize: 15),
-                ),
-                subtitle: Text(
-                  comment.timestamp.toDate().toString().substring(0, 19),
-                ),
-              );
-            }).toList(),
-          ),
-
-        /*  Container(
+          Container(
             height: 80,
             child: ListView.builder(
               itemCount: _comments.length,
@@ -295,9 +210,9 @@ class _FeedContainerState extends State<FeedContainer> {
                   leading: CircleAvatar(
                     radius: 20,
                     backgroundImage: NetworkImage(
-                      widget.parent != null &&
-                          widget.parent.parentProfilePicture.isNotEmpty
-                          ? widget.parent.parentProfilePicture
+                      widget.edu != null &&
+                          widget.edu.educatorProfilePicture.isNotEmpty
+                          ? widget.edu.educatorProfilePicture
                           : 'assets/profilePic.png', // Use appropriate default image
                     ),
                   ),
@@ -313,11 +228,11 @@ class _FeedContainerState extends State<FeedContainer> {
                 );
               },
             ),
-          ),*/
-
+          ),
           Divider(),
         ],
       ),
     );
   }
 }
+*/

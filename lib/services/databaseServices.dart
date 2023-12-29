@@ -42,6 +42,18 @@ class DatabaseServices {
     return querySnapshot.docs.map((doc) => Feed.fromDoc(doc.data() as DocumentSnapshot<Object?>)).toList();
   }
 
+  Future<List<Feed>> fetchAllFeeds() async {
+    // Fetch all documents from the 'feeds' collection
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('feeds').get();
+
+    // Process the documents and convert them into Feed objects
+    List<Feed> feeds = querySnapshot.docs.map((doc) {
+      return Feed.fromDoc(doc); // Convert the document data into a Feed object
+    }).toList();
+
+    return feeds;
+  }
+
 
 
   static void likeFeed(String? currentUserId, Feed feed) {

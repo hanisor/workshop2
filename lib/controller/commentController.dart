@@ -32,4 +32,23 @@ class CommentController {
     });
   }
 
+  static Future<List<Comment>> fetchCommentsForFeed(String? feedId) async {
+    List<Comment> _allComments = [];
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('comments')
+          .where('feedId', isEqualTo: feedId)
+          .get();
+
+      _allComments =
+          querySnapshot.docs.map((doc) => Comment.fromDoc(doc)).toList();
+    } catch (e) {
+      // Handle error
+      print('Error fetching comments: $e');
+    }
+    print("comment : $_allComments");
+    return _allComments;
+  }
+
+
 }

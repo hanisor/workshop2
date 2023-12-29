@@ -187,11 +187,14 @@ class _FeedContainerEduState extends State<FeedContainerEdu> {
 
           Container(
             height: 80,
-            child: ListView.builder(
+            child: // Modify your ListView.builder
+            ListView.builder(
               itemCount: _comments.length,
               itemBuilder: (context, index) {
                 final comment = _comments[index];
                 User? author;
+
+                // Fetch user data based on the comment's authorId
                 for (final user in widget.users) {
                   if (user.uid == comment.authorId) {
                     author = user;
@@ -199,38 +202,37 @@ class _FeedContainerEduState extends State<FeedContainerEdu> {
                   }
                 }
 
-                TextSpan usernameSpan;
+                // Check if author's data exists
                 if (author != null) {
-                  usernameSpan = TextSpan(
-                    text: '${author.displayName}: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  // Use the retrieved profile picture
+                  return ListTile(
+                    leading: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: NetworkImage(author.photoURL ?? ''),
+                    ),
+                    title: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${author.displayName}: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          TextSpan(text: comment.text),
+                        ],
+                      ),
+                    ),
+                    subtitle: Text(comment.timestamp.toDate().toString().substring(0, 19)),
                   );
                 } else {
-                  usernameSpan = TextSpan(text: 'Unknown user: ');
+                  // Handle scenario where author data isn't available
+                  return ListTile(
+                    title: Text('Unknown user'),
+                    subtitle: Text(comment.text),
+                  );
                 }
-
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(
-                      widget.edu != null &&
-                          widget.edu.educatorProfilePicture.isNotEmpty
-                          ? widget.edu.educatorProfilePicture
-                          : 'assets/profilePic.png', // Use appropriate default image
-                    ),
-                  ),
-                  title: RichText(
-                    text: TextSpan(
-                      children: [
-                        usernameSpan,
-                        TextSpan(text: comment.text),
-                      ],
-                    ),
-                  ),
-                  subtitle: Text(comment.timestamp.toDate().toString().substring(0, 19)),
-                );
               },
-            ),
+            )
+
           ),
           Divider(),
         ],
