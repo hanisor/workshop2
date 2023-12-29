@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_test/model/educatorModel.dart';
 import 'package:workshop_test/model/parentModel.dart';
-import 'package:workshop_test/screen/mainFeedPage.dart';
+import 'package:workshop_test/screen/mainFeedPageParent.dart';
+
+import '../screen/mainFeedPageEdu.dart';
 
 class EducatorLoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -21,7 +23,7 @@ class EducatorLoginController {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MainFeedPage(currentUserId: uid),
+            builder: (context) => MainFeedPageEdu(currentUserId: uid),
           ),
         );
 

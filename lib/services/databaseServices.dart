@@ -9,7 +9,7 @@ class DatabaseServices {
   final CollectionReference _feedCollection = FirebaseFirestore.instance.collection('feeds');
 
 
-  static void createFeed(Feed feed) {
+  static createFeed(Feed feed) {
     feedRefs.doc(feed.authorId).set({'FeedTime': feed.timestamp});
     feedRefs.doc(feed.authorId).collection('userFeeds').add({
       'text': feed.text,

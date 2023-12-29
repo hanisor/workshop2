@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_test/screen/new.dart';
 import '../model/parentModel.dart';
-import '../screen/mainFeedPage.dart';
+import '../screen/mainFeedPageParent.dart';
 
 class ParentLoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;

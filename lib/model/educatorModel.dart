@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EducatorModel {
-  final String? id;
+  String? id;
   final String educatorName;
-  final String? educatorProfilePicture;
+  String educatorProfilePicture;
   final String educatorExpertise;
   final String educatorPhoneNumber;
   final String educatorEmail;
@@ -11,7 +11,7 @@ class EducatorModel {
   final String educatorRePassword;
   final String educatorRole;
 
-  const EducatorModel ({
+  EducatorModel ({
     this.id,
     required this.educatorName,
     required this.educatorProfilePicture,

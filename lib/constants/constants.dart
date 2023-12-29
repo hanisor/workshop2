@@ -10,8 +10,9 @@ final storageRef = FirebaseStorage.instance.ref();
 
 final parentRef = _fireStore.collection("parents");
 
-final eduRef = _fireStore.collection("educators Registration");
+final eduRef = _fireStore.collection("educators");
 
+final commentRefs = _fireStore.collection('comments');
 
 final feedRefs = _fireStore.collection('feeds');
 

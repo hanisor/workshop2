@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:workshop_test/model/educatorModel.dart';
 import '../constants/constants.dart';
 import '../model/feedModel.dart';
 import '../model/parentModel.dart';
@@ -24,6 +26,9 @@ class _AddFeedPageState extends State<AddFeedPage> {
   File? _pickedImage ;
   bool _loading = false;
   ParentModel? _parent;
+  EducatorModel? _educator;
+  dynamic _user; // A dynamic variable to hold either ParentModel or EducatorModel
+
 
   Future<void> handleImageFromGallery() async {
     try {
@@ -57,17 +62,57 @@ class _AddFeedPageState extends State<AddFeedPage> {
   void initState() {
     super.initState();
     // Fetch the ParentModel here when the widget is initialized
-    fetchParentModel();
+    fetchUserData();
+
   }
 
+  //
+  // @override
+  // void didUpdateWidget(covariant AddFeedPage oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   if (oldWidget.currentUserId != widget.currentUserId) {
+  //     fetchParentModel(); // Fetch ParentModel again with the new currentUserId
+  //   }
+  // }
 
-  @override
-  void didUpdateWidget(covariant AddFeedPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentUserId != widget.currentUserId) {
-      fetchParentModel(); // Fetch ParentModel again with the new currentUserId
+
+  Future<void> fetchUserData() async {
+    // Determine user type based on currentUserId
+    bool isEducatorUser = await isEducator(widget.currentUserId);
+
+    if (isEducatorUser) {
+      await fetchEducatorModel();
+      _user = _educator; // Assign fetched EducatorModel to _user
+    } else {
+      await fetchParentModel();
+      _user = _parent; // Assign fetched ParentModel to _user
     }
   }
+
+  Future<bool> isEducator(String? userId) async {
+    try {
+      if (userId != null) {
+        DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('educators')
+            .doc(userId)
+            .get();
+
+        if (userSnapshot.exists) {
+          // Check the 'userType' field to determine the user type
+          String? educatorRole = userSnapshot['educatorRole'];
+
+          // Return true if the userType is 'educator', false otherwise
+          return educatorRole == 'educator';
+        }
+      }
+    } catch (e) {
+      print('Error determining user type: $e');
+    }
+
+    // Return false by default or if there's an error
+    return false;
+  }
+
 
 
   Future<void> fetchParentModel() async {
@@ -100,6 +145,40 @@ class _AddFeedPageState extends State<AddFeedPage> {
     } catch (e) {
       // Error occurred during fetching
       print('Error fetching parent from Firestore: $e');
+      return null;
+    }
+  }
+
+  Future<void> fetchEducatorModel() async {
+    // Retrieve ParentModel from Firestore using currentUserId
+    EducatorModel? edu = await getEducatorFromFirestore(widget.currentUserId);
+
+    // Handle the fetched ParentModel here (update state or perform actions)
+    if (edu != null) {
+      setState(() {
+        _educator = edu;
+      });
+    }
+  }
+
+  Future<EducatorModel?> getEducatorFromFirestore(String? educatorId) async {
+    try {
+      DocumentSnapshot educatorSnapshot = await FirebaseFirestore.instance
+          .collection('educators')
+          .doc(educatorId)
+          .get();
+
+      if (educatorSnapshot.exists) {
+        // If the document exists, return the converted ParentModel
+        return EducatorModel.fromDoc(educatorSnapshot);
+      } else {
+        // Document does not exist
+        print('Document for educatorId: $educatorId does not exist');
+        return null;
+      }
+    } catch (e) {
+      // Error occurred during fetching
+      print('Error fetching educator from Firestore: $e');
       return null;
     }
   }
@@ -183,49 +262,39 @@ class _AddFeedPageState extends State<AddFeedPage> {
                     });
                     if (_feedText != null && _feedText.isNotEmpty) {
                       String imageUrl = ''; // Default empty URL if no image is selected
+
                       if (_pickedImage != null) {
                         try {
-                          // Upload the image and get the URL
-                          imageUrl =
-                          await StorageService.uploadFeedPicture(_pickedImage!);
+                          imageUrl = await StorageService.uploadFeedPicture(_pickedImage!);
                         } catch (e) {
-                          // Inside the `catch` blocks for image upload and feed creation errors
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                  'Failed to upload image. Please try again.'),
-                              // Adjust duration, styling, and other properties as needed
+                              content: Text('Failed to upload image. Please try again.'),
                             ),
                           );
-
                           print('Image upload error: $e');
-                          // Handle image upload error (show a message to the user or take appropriate action)
                         }
                       }
-                      ParentModel? parent = await getParentFromFirestore(
-                          widget.currentUserId); // Ensure parentId is available
 
-                      if (parent != null) {
-                        // Create the Feed object with the retrieved parent data
+                      if (_user != null) {
                         Feed feed = Feed(
                           text: _feedText,
                           image: imageUrl,
                           likes: 0,
                           timestamp: Timestamp.fromDate(DateTime.now()),
-                          id: widget.currentUserId,
-                          // Ensure these fields exist in ParentModel
                           authorId: widget.currentUserId,
+                          id: '', // Ensure to assign a valid ID for the feed
                         );
 
                         try {
-                          // Attempt to create the feed
-                          DatabaseServices.createFeed(feed);
+                          await DatabaseServices.createFeed(feed); // Await the feed creation
                           Navigator.pop(context);
                         } catch (e) {
                           print('Feed creation error: $e');
                           // Handle feed creation error (show a message to the user or take appropriate action)
                         }
                       }
+
                       setState(() {
                         _loading = false;
                       });

@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_test/constants/constants.dart';
+import 'package:workshop_test/controller/commentController.dart';
+import '../model/commentModel.dart';
 import '../model/feedModel.dart';
 import '../model/parentModel.dart';
 import '../services/databaseServices.dart';
@@ -8,13 +11,16 @@ import '../services/databaseServices.dart';
 class FeedContainer extends StatefulWidget {
   final Feed feed;
   final ParentModel parent;
-  //final String currentUserId;
+  final String? currentUserId;
+  final List<User> users; // Include the list of users here
 
   const FeedContainer({
     Key? key,
     required this.feed,
     required this.parent,
-    //required this.currentUserId,
+    required this.currentUserId,
+    required this.users, // Pass the list of users
+
   }) : super(key: key);
 
   @override
@@ -24,8 +30,8 @@ class FeedContainer extends StatefulWidget {
 class _FeedContainerState extends State<FeedContainer> {
   int _likesCount = 0;
   bool _isLiked = false;
-  late ParentModel _parentModel;
-
+  final _commentController = TextEditingController();
+  final List<Comment> _comments = [];
 
   initFeedLikes() async {
     bool isLiked =
@@ -54,6 +60,12 @@ class _FeedContainerState extends State<FeedContainer> {
   }
 
   @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _likesCount = widget.feed.likes;
@@ -69,35 +81,15 @@ class _FeedContainerState extends State<FeedContainer> {
     initFeedLikes();
   }
 
-  // Future<void> initParentModel() async {
-  //   try {
-  //     ParentModel parent = await DatabaseServices.getParentModelData(widget.feed.authorId);
-  //     setState(() {
-  //       _parentModel = parent;
-  //     });
-  //   } catch (e) {
-  //     print("Error initializing ParentModel: $e");
-  //     setState(() {
-  //       _parentModel = ParentModel(
-  //         //id: widget.currentUserId,
-  //         parentName: 'Name', // Use null-aware operator to handle null values
-  //         parentProfilePicture: 'parentProfilePicture',
-  //         parentPhoneNumber: 'parentPhoneNumber',
-  //         parentEmail: 'parentEmail',
-  //         parentPassword: 'parentPassword',
-  //         parentRePassword:'parentRePassword',
-  //         role: 'role',
-  //       );  // Handle error by assigning an empty model
-  //     });
-  //   }
-  // }
-
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity, // Provide width constraints
+      constraints: BoxConstraints(maxHeight: MediaQuery
+          .of(context)
+          .size
+          .height),
       child: Column(
+        mainAxisSize: MainAxisSize.min, // Add this line
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -107,10 +99,9 @@ class _FeedContainerState extends State<FeedContainer> {
                 backgroundImage: widget.parent != null &&
                     widget.parent.parentProfilePicture.isNotEmpty
                     ? NetworkImage(widget.parent.parentProfilePicture)
-                    : AssetImage('assets/profilePic.png') as ImageProvider<Object>,
-
+                    : AssetImage('assets/profilePic.png') as ImageProvider<
+                    Object>,
               ),
-
               SizedBox(width: 10),
               Text(
                 widget.parent.parentName,
@@ -131,20 +122,20 @@ class _FeedContainerState extends State<FeedContainer> {
           widget.feed.image.isEmpty
               ? SizedBox.shrink()
               : Column(
-                children: [
-                  SizedBox(height: 15),
-                  Container(
-                    height: 250,
-                    decoration: BoxDecoration(
-                      color: AutiTrackColor,
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(widget.feed.image),
-                      ),
-                    ),
+            children: [
+              SizedBox(height: 15),
+              Container(
+                height: 250,
+                decoration: BoxDecoration(
+                  color: AutiTrackColor,
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: NetworkImage(widget.feed.image),
                   ),
-                ],
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 15),
           Row(
@@ -171,7 +162,78 @@ class _FeedContainerState extends State<FeedContainer> {
             ],
           ),
           SizedBox(height: 10),
-          Divider()
+
+          TextField(
+            controller: _commentController,
+            decoration: InputDecoration(hintText: 'Enter your comment'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newComment = Comment(
+                text: _commentController.text,
+                timestamp: Timestamp.fromDate(DateTime.now()),
+                authorId: widget.currentUserId,
+                feedId: widget.feed.id
+              );
+
+              setState(() {
+                _comments.add(newComment);
+                _commentController.clear();
+              });
+
+              await CommentController.createComment(newComment);
+            },
+            child: Text('Submit Comment'),
+          ),
+
+          Container(
+            height: 80,
+            child: ListView.builder(
+              itemCount: _comments.length,
+              itemBuilder: (context, index) {
+                final comment = _comments[index];
+                User? author;
+                for (final user in widget.users) {
+                  if (user.uid == comment.authorId) {
+                    author = user;
+                    break;
+                  }
+                }
+
+                TextSpan usernameSpan;
+                if (author != null) {
+                  usernameSpan = TextSpan(
+                    text: '${author.displayName}: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  );
+                } else {
+                  usernameSpan = TextSpan(text: 'Unknown user: ');
+                }
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: NetworkImage(
+                      widget.parent != null &&
+                          widget.parent.parentProfilePicture.isNotEmpty
+                          ? widget.parent.parentProfilePicture
+                          : 'assets/profilePic.png', // Use appropriate default image
+                    ),
+                  ),
+                  title: RichText(
+                    text: TextSpan(
+                      children: [
+                        usernameSpan,
+                        TextSpan(text: comment.text),
+                      ],
+                    ),
+                  ),
+                  subtitle: Text(comment.timestamp.toDate().toString().substring(0, 19)),
+                );
+              },
+            ),
+          ),
+          Divider(),
         ],
       ),
     );
