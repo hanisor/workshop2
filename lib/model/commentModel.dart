@@ -43,4 +43,9 @@ class Comment {
       timestamp: json['timestamp'],
     );
   }
+
+  @override
+  String toString() {
+    return 'Comment ID: $id, Text: $text, authorId: $authorId, feedId: $feedId, timestamp: $timestamp';
+  }
 }

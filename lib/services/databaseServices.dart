@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../Constants/Constants.dart';
 import '../model/feedModel.dart';
 
@@ -7,7 +8,7 @@ import '../model/feedModel.dart';
 class DatabaseServices {
 
   final CollectionReference _feedCollection = FirebaseFirestore.instance.collection('feeds');
-
+  final firestoreInstance = FirebaseFirestore.instance;
 
   static createFeed(Feed feed) {
     feedRefs.doc(feed.authorId).set({'FeedTime': feed.timestamp});
@@ -31,6 +32,59 @@ class DatabaseServices {
 
     return userFeeds;
   }
+
+ /* static Future<List<Feed>> getAllFeeds() async {
+    QuerySnapshot feedsSnapshot = await FirebaseFirestore.instance
+        .collection('feeds')
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    List<Feed> allFeeds = feedsSnapshot.docs.map((doc) => Feed.fromDoc(doc)).toList();
+
+    return allFeeds;
+  }*/
+
+/*  static Future<List<Feed>> getAllFeedsFromFirestore() async {
+    QuerySnapshot userFeedsSnap = await FirebaseFirestore.instance
+        .collection('feeds') // Assuming 'feeds' is your main collection
+        .doc('authorId') // Replace 'userId' with the actual user ID
+        .collection('userFeeds') // Assuming 'userFeeds' is the subcollection
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    List<Feed> allFeeds = userFeedsSnap.docs.map((doc) => Feed.fromDoc(doc)).toList();
+
+    return allFeeds;
+  }*/
+
+  static Future<List<Feed>> retrieveSubFeeds() async {
+    List<Feed> feeds = [];
+
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("feeds")
+          .get();
+
+      for (QueryDocumentSnapshot document in querySnapshot.docs) {
+        QuerySnapshot subCollectionSnapshot = await FirebaseFirestore.instance
+            .collection("feeds")
+            .doc(document.id)
+            .collection("userFeeds")
+            .get();
+
+        List<Feed> subFeeds = subCollectionSnapshot.docs
+            .map((subDoc) => Feed.fromDoc(subDoc))
+            .toList();
+
+        feeds.addAll(subFeeds);
+      }
+    } catch (e) {
+      print("Error retrieving sub feeds: $e");
+    }
+
+    return feeds;
+  }
+
 
   Future<List<Feed>> getFeedById() async {
     var userId = FirebaseAuth.instance.currentUser?.uid;

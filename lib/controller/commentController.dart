@@ -31,8 +31,7 @@ class CommentController {
       'feedId': comment.feedId,
     });
   }
-
-  static Future<List<Comment>> fetchCommentsForFeed(String? feedId) async {
+ /* static Future<List<Comment>> fetchCommentsForFeed(String? feedId) async {
     List<Comment> _allComments = [];
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -49,6 +48,43 @@ class CommentController {
     print("comment : $_allComments");
     return _allComments;
   }
+*/
 
+  static Future<List<Comment>> fetchComments(String? feedId) async {
+    List<Comment> comments = [];
 
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("comments")
+          .where('feedId', isEqualTo: feedId)
+          .get();
+
+      comments = querySnapshot.docs
+          .map((doc) => Comment.fromDoc(doc))
+          .toList();
+    } catch (e) {
+      print("Error retrieving comments for feed: $e");
+    }
+
+    return comments;
+  }
+
+  static Future<List<Comment>> fetchCommentsForFeed(String? feedId) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('comments')
+          .doc(feedId)
+          .collection('comments')
+          .get();
+
+      List<Comment> comments = querySnapshot.docs
+          .map((doc) => Comment.fromDoc(doc))
+          .toList();
+
+      return comments;
+    } catch (e) {
+      print('Error fetching comments for feed: $e');
+      return []; // Return an empty list or handle the error accordingly
+    }
+  }
 }

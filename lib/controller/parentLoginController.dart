@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:workshop_test/screen/new.dart';
 import '../model/parentModel.dart';
 import '../screen/mainFeedPageParent.dart';
+import '../screen/mainScreen.dart';
 
 class ParentLoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -21,7 +22,7 @@ class ParentLoginController {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MainFeedPage(currentUserId: uid),
+            builder: (context) => MainScreen(currentUserId: uid),
           ),
         );
 

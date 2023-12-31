@@ -28,4 +28,20 @@ class Feed {
       likes: doc['likes'],
     );
   }
+
+
+  static Feed fromJson(Map<String, dynamic> json) {
+    return Feed(
+      id: json['id'],
+      authorId: json['authorId']!= null ? json['authorId'] : '',
+      text: json['text'] != null ? json['text'] : '',
+      image: json['image']!= null ? json['image'] : '',
+      timestamp: json['timestamp'] != null ? json['timestamp'] : Timestamp.now(),
+      likes: json['likes']!= null ? int.parse(json['authorId']) : 0,
+    );
+  }
+  @override
+  String toString() {
+    return 'Feed ID: $id, Author ID: $authorId, Text: $text, Image: $image, Timestamp: $timestamp, Likes: $likes';
+  }
 }

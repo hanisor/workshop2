@@ -9,17 +9,17 @@ import 'package:flutter/material.dart';
   import 'package:shared_preferences/shared_preferences.dart';
 
 
-  class MainFeedPage extends StatefulWidget {
+  class MainFeedPageParent extends StatefulWidget {
     final String? currentUserId;
 
 
-    const MainFeedPage({required this.currentUserId});
+    const MainFeedPageParent({required this.currentUserId});
 
     @override
-    _MainFeedPageState createState() => _MainFeedPageState();
+    _MainFeedPageParentState createState() => _MainFeedPageParentState();
   }
 
-  class _MainFeedPageState extends State<MainFeedPage> {
+  class _MainFeedPageParentState extends State<MainFeedPageParent> {
     List _followingFeeds = [];
     bool _loading = false;
     int _selectedTabIndex = 0;
@@ -48,7 +48,7 @@ import 'package:flutter/material.dart';
     buildFeeds(Feed feed, ParentModel parent) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 15),
-        child: FeedContainer(
+        child: FeedContainerParent(
           feed: feed,
           parent: parent,
           currentUserId: widget.currentUserId,
@@ -96,7 +96,6 @@ import 'package:flutter/material.dart';
       super.initState();
       _loadFeedData();
       setupFollowingFeeds();
-
     }
 
     Future<void> _loadFeedData() async {
@@ -138,7 +137,7 @@ import 'package:flutter/material.dart';
             height: 40,
           ),
           title: Text(
-            'Home Screen',
+            'Feeds',
             style: TextStyle(
               color: AutiTrackColor,
             ),
@@ -183,26 +182,5 @@ import 'package:flutter/material.dart';
         ),
       );
     }
-
-    @override
-    Widget buildMenu(BuildContext context) {
-      return Scaffold(
-        body: _pages[_selectedTabIndex], // Show the selected page
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedTabIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedTabIndex = index; // Update the selected tab index
-            });
-          },
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Menu'),
-            // Add other bottom navigation items as needed
-          ],
-        ),
-      );
-    }
   }
-
 

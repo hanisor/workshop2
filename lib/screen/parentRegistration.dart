@@ -60,15 +60,6 @@ class _ParentRegistrationState extends State<ParentRegistration> {
       id: pId,
     );
 
-    print('Pid: ${parent.id}'); // Access profilePic from the 'parent' instance
-    print('Profile Pic: ${parent.parentProfilePicture}'); // Access profilePic from the 'parent' instance
-    print('Name: ${parent.parentName}');
-    print('num: ${parent.parentPhoneNumber}'); // Access profilePic from the 'parent' instance
-    print('email: ${parent.parentEmail}'); // Access name from the 'parent' instance
-    print('pass: ${parent.parentPassword}'); // Access profilePic from the 'parent' instance
-    print('re: ${parent.parentRePassword}'); // Access name from the 'parent' instance
-// Access name from the 'parent' instance
-
 
     await _controller.createAccount(context, parent);
 

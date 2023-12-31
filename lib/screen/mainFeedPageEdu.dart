@@ -138,7 +138,7 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
           height: 40,
         ),
         title: Text(
-          'Home Screen',
+          'Feeds',
           style: TextStyle(
             color: AutiTrackColor,
           ),

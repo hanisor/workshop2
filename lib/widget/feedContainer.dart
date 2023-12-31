@@ -12,13 +12,13 @@ import '../services/databaseServices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-class FeedContainer extends StatefulWidget {
+class FeedContainerParent extends StatefulWidget {
   final Feed feed;
   final ParentModel parent;
   final String? currentUserId;
   final List<User> users;
 
-  const FeedContainer({
+  const FeedContainerParent({
     Key? key,
     required this.feed,
     required this.parent,
@@ -28,10 +28,10 @@ class FeedContainer extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FeedContainerState createState() => _FeedContainerState();
+  _FeedContainerParentState createState() => _FeedContainerParentState();
 }
 
-class _FeedContainerState extends State<FeedContainer> {
+class _FeedContainerParentState extends State<FeedContainerParent> {
   int _likesCount = 0;
   bool _isLiked = false;
   final _commentController = TextEditingController();
@@ -103,14 +103,6 @@ class _FeedContainerState extends State<FeedContainer> {
     super.initState();
     _likesCount = widget.feed.likes;
     _initializeSharedPreferences();
-
-    // Debugging prints to check profilePic and name
-    print('Id: ${widget.feed.authorId}');
-    print('Profile Pic: ${widget.parent.parentProfilePicture}');
-    print('Name: ${widget.parent.parentName}');
-    print('text: ${widget.feed.text}');
-    print('image: ${widget.feed.image}');
-
     initFeedLikes();
     _fetchComments();
 
@@ -152,7 +144,7 @@ class _FeedContainerState extends State<FeedContainer> {
               ),
               SizedBox(width: 10),
               Text(
-                widget.parent.parentName,
+                "${widget.parent.parentName} - parent",
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
@@ -238,58 +230,20 @@ class _FeedContainerState extends State<FeedContainer> {
             children: _allComments.map((comment) {
               return ListTile(
                 title: Text(comment.text),
-
-                    
+                subtitle: Text(comment.timestamp.toDate().toString().substring(0, 19)),
               );
             }).toList(),
           ),
 
-          Column(
-            children: _allComments.map((comment) {
-              return ListTile(
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                    // Use the appropriate profile picture here
-                    widget.parent != null && widget.parent.parentProfilePicture.isNotEmpty
-                        ? widget.parent.parentProfilePicture
-                        : 'assets/profilePic.png',
-                  ),
-                ),
-                title: Text(
-                  comment.text,
-                  style: const TextStyle(fontSize: 15),
-                ),
-                subtitle: Text(
-                  comment.timestamp.toDate().toString().substring(0, 19),
-                ),
-              );
-            }).toList(),
-          ),
-
-        /*  Container(
+          // Container displaying comments using ListView.builder
+          Container(
             height: 80,
             child: ListView.builder(
               itemCount: _comments.length,
               itemBuilder: (context, index) {
                 final comment = _comments[index];
-                User? author;
-                for (final user in widget.users) {
-                  if (user.uid == comment.authorId) {
-                    author = user;
-                    break;
-                  }
-                }
-
-                TextSpan usernameSpan;
-                if (author != null) {
-                  usernameSpan = TextSpan(
-                    text: '${author.displayName}: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  );
-                } else {
-                  usernameSpan = TextSpan(text: 'Unknown user: ');
-                }
+                // Use appropriate logic to get the parent associated with the comment
+                // ParentModel parent = getParentForComment(comment);
 
                 return ListTile(
                   leading: CircleAvatar(
@@ -298,23 +252,33 @@ class _FeedContainerState extends State<FeedContainer> {
                       widget.parent != null &&
                           widget.parent.parentProfilePicture.isNotEmpty
                           ? widget.parent.parentProfilePicture
-                          : 'assets/profilePic.png', // Use appropriate default image
+                          : 'assets/profilePic.png',
                     ),
                   ),
-                  title: RichText(
-                    text: TextSpan(
-                      children: [
-                        usernameSpan,
-                        TextSpan(text: comment.text),
-                      ],
-                    ),
+                  title: Column(
+                    mainAxisSize: MainAxisSize.min, // Add this line
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.parent.parentName,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        comment.text,
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ],
                   ),
-                  subtitle: Text(comment.timestamp.toDate().toString().substring(0, 19)),
+                  subtitle: Text(
+                    comment.timestamp.toDate().toString().substring(0, 19),
+                  ),
                 );
               },
             ),
-          ),*/
-
+          ),
           Divider(),
         ],
       ),

@@ -1,76 +1,110 @@
-/*
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:workshop_test/model/educatorModel.dart';
+import 'package:workshop_test/model/parentModel.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
-import 'package:workshop_test/widget/feedContainerEdu.dart';
+import 'package:workshop_test/screen/feedContainerBoth.dart';
 import '../constants/constants.dart';
+import '../model/educatorModel.dart';
 import '../model/feedModel.dart';
 import '../services/databaseServices.dart';
 import '../widget/feedContainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-class MainFeedPageEdu extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   final String? currentUserId;
 
 
-  const MainFeedPageEdu({required this.currentUserId});
+  const MainScreen({required this.currentUserId});
 
   @override
-  _MainFeedPageEduState createState() => _MainFeedPageEduState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainFeedPageEduState extends State<MainFeedPageEdu> {
+class _MainScreenState extends State<MainScreen> {
   List _followingFeeds = [];
   bool _loading = false;
-  int _selectedTabIndex = 0;
-  late List<Widget> _pages;
   late SharedPreferences _prefs;
-  late List<Feed> _feeds = [];
+  List<Feed> _allFeeds = []; // Add a list to store all feeds
+  List<QueryDocumentSnapshot> feedItems = [];
 
-
-  // Feed? get feed {
-  //   if (_followingFeeds.isNotEmpty) {
-  //     return _followingFeeds.first; // Return the first feed from the list
-  //   } else {
-  //     return null; // Return null if the list is empty
-  //   }
-  // }
-  //
-  // EducatorModel? get edu {
-  //   // Assuming edu data is associated with the first feed in the list
-  //   if (_followingFeeds.isNotEmpty) {
-  //     return _followingFeeds.single; // Access edu from the first feed
-  //   } else {
-  //     return null; // Return null if the list is empty
-  //   }
-  // }
-
-
-  buildFeeds(Feed feed) {
+  buildFeeds(Feed feed, {ParentModel? parent, EducatorModel? edu}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
-      child: FeedContainer(
+      child: FeedContainerBoth(
         feed: feed,
+        parent: parent,
+        edu: edu,
         currentUserId: widget.currentUserId,
         users: [],
       ),
     );
+  }
+  Widget showFeeds(Feed feed)  {
+    return FutureBuilder<DocumentSnapshot>(
+      future: parentRef.doc(feed.authorId).get(),
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // Show a loading indicator while waiting for data
+        } else if (snapshot.hasData && snapshot.data != null) {
+          DocumentSnapshot userData = snapshot.data!;
+          if (userData.exists) {
+            List<Widget> followingFeedsList = [];
+            for (Feed feed in _followingFeeds) {
+              if (userData['role'] == "parent") {
+                ParentModel parent = ParentModel.fromDoc(userData);
+                parent.id = feed.authorId;
+                followingFeedsList.add(buildFeeds(feed, parent: parent));
+              } else {
+                EducatorModel edu = EducatorModel.fromDoc(userData);
+                edu.id = feed.authorId;
+                followingFeedsList.add(buildFeeds(feed, edu: edu));
+              }
+            }
+            return Column(children: followingFeedsList);
+          } else {
+            return const SizedBox.shrink(); // Return an empty SizedBox if there's no data
+          }
+        } else {
+          return const SizedBox.shrink(); // Return an empty SizedBox if there's no data
+        }
+      },
+    );
+  }
+
+  Future<void> setupFollowingFeeds() async {
+    setState(() {
+      _loading = true;
+    });
+
+    // Fetch feeds directly from Firestore
+    _allFeeds = await DatabaseServices.retrieveSubFeeds();
+
+    if (mounted) {
+      setState(() {
+        _loading = false;
+      });
+
+      // Set the fetched feeds directly to _followingFeeds
+      _followingFeeds = _allFeeds.toList(); // Assuming all fetched feeds are to be followed
+
+      print('Fetched Feeds:');
+      _allFeeds.forEach((feed) {
+        print('Feed ID: ${feed.id}, Author ID: ${feed.authorId}, Text: ${feed.text}');
+      });
+
+      print('Following Feeds:');
+      _followingFeeds.forEach((feed) {
+        print('Feed ID: ${feed.id}, Author ID: ${feed.authorId}, Text: ${feed.text}');
+      });
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _loadFeedData();
-    // setupFollowingFeeds();
-    fetchAndSetFeeds();
-  }
-
-  Future<void> fetchAndSetFeeds() async {
-    List<Feed> fetchedFeeds = await DatabaseServices.fetchAllFeeds();
-    setState(() {
-      _feeds = fetchedFeeds;
-    });
+    setupFollowingFeeds();
   }
 
   Future<void> _loadFeedData() async {
@@ -81,6 +115,10 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
     });
   }
 
+  Future<void> _saveFeedData(List<String> feedIds) async {
+    _prefs = await SharedPreferences.getInstance();
+    await _prefs.setStringList('following_feeds', feedIds);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,47 +145,41 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
           height: 40,
         ),
         title: Text(
-          'Home Screen',
+          'Feeds',
           style: TextStyle(
             color: AutiTrackColor,
           ),
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () => fetchAndSetFeeds(),
-        child: ListView.builder(
-          physics: BouncingScrollPhysics(),
-          itemCount: _feeds.length,
-          itemBuilder: (context, index) {
-            Feed feed = _feeds[index];
-            // Display your feed data here using a FeedContainerEdu or similar widget
-            return buildFeeds(feed);
-          },
-        ),
+        onRefresh: () => setupFollowingFeeds(),
+        child: ListView(
+          physics: BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          children: [
+            _loading ? LinearProgressIndicator() : SizedBox.shrink(),
+            SizedBox(height: 5),
+            Column(
+              children: _followingFeeds.isEmpty && _loading == false
+                  ? [
+                SizedBox(height: 5),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  child: Text(
+                    'There is No New Tweets',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                )
+              ]
+                  : _followingFeeds.map((feed) => showFeeds(feed)).toList(),
+            ),
+          ],
       ),
-    );
-  }
-
-  @override
-  Widget buildMenu(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedTabIndex], // Show the selected page
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedTabIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedTabIndex = index; // Update the selected tab index
-          });
-        },
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Menu'),
-          // Add other bottom navigation items as needed
-        ],
       ),
-    );
+        );
   }
 }
 
-
-*/

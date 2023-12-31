@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workshop_test/constants/constants.dart';
 import 'package:workshop_test/controller/commentController.dart';
 import 'package:workshop_test/model/educatorModel.dart';
@@ -32,6 +35,9 @@ class _FeedContainerEduState extends State<FeedContainerEdu> {
   bool _isLiked = false;
   final _commentController = TextEditingController();
   final List<Comment> _comments = [];
+  List<Comment> _allComments = []; // List to store fetched comments
+  late SharedPreferences _prefs;
+
 
   initFeedLikes() async {
     bool isLiked =
@@ -69,15 +75,47 @@ class _FeedContainerEduState extends State<FeedContainerEdu> {
   void initState() {
     super.initState();
     _likesCount = widget.feed.likes;
-
-    // Debugging prints to check profilePic and name
-    print('Id: ${widget.feed.authorId}');
-    print('Profile Pic: ${widget.edu.educatorProfilePicture}');
-    print('Name: ${widget.edu.educatorName}');
-    print('text: ${widget.feed.text}');
-    print('image: ${widget.feed.image}');
-
+    _initializeSharedPreferences();
     initFeedLikes();
+    _fetchComments();
+  }
+
+  // Initialize shared preferences
+  void _initializeSharedPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    // Load comments from shared preferences
+    _loadComments();
+  }
+
+  // Save comments to shared preferences
+  void _saveComments() {
+    String commentsJson = jsonEncode(_comments.map((comment) => comment.toJson()).toList());
+    _prefs.setString('comments', commentsJson);
+  }
+
+  // Load comments from shared preferences
+  void _loadComments() {
+    String? commentsJson = _prefs.getString('comments');
+    if (commentsJson != null && commentsJson.isNotEmpty) {
+      List<dynamic> commentsData = jsonDecode(commentsJson);
+      List<Comment> loadedComments = commentsData.map((data) => Comment.fromJson(data)).toList();
+      setState(() {
+        _comments.clear();
+        _comments.addAll(loadedComments);
+      });
+    }
+  }
+  void _fetchComments() async {
+    try {
+      List<Comment> comments = await CommentController.fetchCommentsForFeed(widget.feed.id);
+      setState(() {
+        _allComments = comments;
+        print ("comment: $_allComments");
+      });
+    } catch (e) {
+      // Handle errors, e.g., print or show an error message
+      print('Error fetching comments: $e');
+    }
   }
 
   @override
@@ -185,54 +223,58 @@ class _FeedContainerEduState extends State<FeedContainerEdu> {
             child: Text('Submit Comment'),
           ),
 
+          Column(
+            children: _allComments.map((comment) {
+              return ListTile(
+                title: Text(comment.text),
+                subtitle: Text(comment.timestamp.toDate().toString().substring(0, 19)),
+              );
+            }).toList(),
+          ),
+
+          // Container displaying comments using ListView.builder
           Container(
             height: 80,
-            child: // Modify your ListView.builder
-            ListView.builder(
+            child: ListView.builder(
               itemCount: _comments.length,
               itemBuilder: (context, index) {
                 final comment = _comments[index];
-                User? author;
+                // Use appropriate logic to get the parent associated with the comment
+                // ParentModel parent = getParentForComment(comment);
 
-                // Fetch user data based on the comment's authorId
-                for (final user in widget.users) {
-                  if (user.uid == comment.authorId) {
-                    author = user;
-                    break;
-                  }
-                }
-
-                // Check if author's data exists
-                if (author != null) {
-                  // Use the retrieved profile picture
-                  return ListTile(
-                    leading: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(author.photoURL ?? ''),
+                return ListTile(
+                  leading: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: NetworkImage(
+                      widget.edu != null &&
+                          widget.edu.educatorProfilePicture.isNotEmpty
+                          ? widget.edu.educatorProfilePicture
+                          : 'assets/profilePic.png',
                     ),
-                    title: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '${author.displayName}: ',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: comment.text),
-                        ],
+                  ),
+                  title: Column(
+                    mainAxisSize: MainAxisSize.min, // Add this line
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.edu.educatorName,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(comment.timestamp.toDate().toString().substring(0, 19)),
-                  );
-                } else {
-                  // Handle scenario where author data isn't available
-                  return ListTile(
-                    title: Text('Unknown user'),
-                    subtitle: Text(comment.text),
-                  );
-                }
+                      Text(
+                        comment.text,
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(
+                    comment.timestamp.toDate().toString().substring(0, 19),
+                  ),
+                );
               },
-            )
-
+            ),
           ),
           Divider(),
         ],
