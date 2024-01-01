@@ -1,3 +1,4 @@
+/*
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -66,6 +67,8 @@ class _FeedContainerParentState extends State<FeedContainerParent> {
     }
   }
 
+*/
+/*
   // Initialize shared preferences
   void _initializeSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
@@ -91,20 +94,25 @@ class _FeedContainerParentState extends State<FeedContainerParent> {
       });
     }
   }
+*//*
 
+
+*/
+/*
   @override
   void dispose() {
     _commentController.dispose();
     _saveComments();
     super.dispose();  }
+*//*
+
 
   @override
   void initState() {
     super.initState();
     _likesCount = widget.feed.likes;
-    _initializeSharedPreferences();
     initFeedLikes();
-    _fetchComments();
+    // _fetchComments();
 
   }
 
@@ -284,4 +292,4 @@ class _FeedContainerParentState extends State<FeedContainerParent> {
       ),
     );
   }
-}
+}*/

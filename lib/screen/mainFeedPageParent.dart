@@ -1,12 +1,10 @@
-  import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-  import 'package:workshop_test/model/parentModel.dart';
-  import 'package:workshop_test/screen/addFeedPage.dart';
-  import '../constants/constants.dart';
-  import '../model/feedModel.dart';
-  import '../services/databaseServices.dart';
-  import '../widget/feedContainer.dart';
-  import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workshop_test/model/parentModel.dart';
+import 'package:workshop_test/screen/addFeedPage.dart';
+import 'package:workshop_test/widget/feedContainerBoth.dart';
+import '../constants/constants.dart';
+import '../model/feedModel.dart';
+import '../services/databaseServices.dart';
 
 
   class MainFeedPageParent extends StatefulWidget {
@@ -22,33 +20,11 @@ import 'package:flutter/material.dart';
   class _MainFeedPageParentState extends State<MainFeedPageParent> {
     List _followingFeeds = [];
     bool _loading = false;
-    int _selectedTabIndex = 0;
-    late List<Widget> _pages;
-    late SharedPreferences _prefs;
-
-
-    Feed? get feed {
-      if (_followingFeeds.isNotEmpty) {
-        return _followingFeeds.first; // Return the first feed from the list
-      } else {
-        return null; // Return null if the list is empty
-      }
-    }
-
-    ParentModel? get parent {
-      // Assuming parent data is associated with the first feed in the list
-      if (_followingFeeds.isNotEmpty) {
-        return _followingFeeds.single; // Access parent from the first feed
-      } else {
-        return null; // Return null if the list is empty
-      }
-    }
-
 
     buildFeeds(Feed feed, ParentModel parent) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 15),
-        child: FeedContainerParent(
+        child: FeedContainerBoth(
           feed: feed,
           parent: parent,
           currentUserId: widget.currentUserId,
@@ -94,23 +70,8 @@ import 'package:flutter/material.dart';
     @override
     void initState() {
       super.initState();
-      _loadFeedData();
       setupFollowingFeeds();
     }
-
-    Future<void> _loadFeedData() async {
-      _prefs = await SharedPreferences.getInstance();
-      final savedFeedIds = _prefs.getStringList('following_feeds') ?? [];
-      setState(() {
-        _followingFeeds = savedFeedIds;
-      });
-    }
-
-    Future<void> _saveFeedData(List<String> feedIds) async {
-      _prefs = await SharedPreferences.getInstance();
-      await _prefs.setStringList('following_feeds', feedIds);
-    }
-
 
     @override
     Widget build(BuildContext context) {

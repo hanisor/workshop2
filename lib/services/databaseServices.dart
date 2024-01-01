@@ -33,29 +33,6 @@ class DatabaseServices {
     return userFeeds;
   }
 
- /* static Future<List<Feed>> getAllFeeds() async {
-    QuerySnapshot feedsSnapshot = await FirebaseFirestore.instance
-        .collection('feeds')
-        .orderBy('timestamp', descending: true)
-        .get();
-
-    List<Feed> allFeeds = feedsSnapshot.docs.map((doc) => Feed.fromDoc(doc)).toList();
-
-    return allFeeds;
-  }*/
-
-/*  static Future<List<Feed>> getAllFeedsFromFirestore() async {
-    QuerySnapshot userFeedsSnap = await FirebaseFirestore.instance
-        .collection('feeds') // Assuming 'feeds' is your main collection
-        .doc('authorId') // Replace 'userId' with the actual user ID
-        .collection('userFeeds') // Assuming 'userFeeds' is the subcollection
-        .orderBy('timestamp', descending: true)
-        .get();
-
-    List<Feed> allFeeds = userFeedsSnap.docs.map((doc) => Feed.fromDoc(doc)).toList();
-
-    return allFeeds;
-  }*/
 
   static Future<List<Feed>> retrieveSubFeeds() async {
     List<Feed> feeds = [];
@@ -108,7 +85,19 @@ class DatabaseServices {
     return feeds;
   }
 
-
+  static void deleteFeedFromUserFeeds(String feedId, String authorId) {
+    feedRefs
+        .doc(authorId)
+        .collection('userFeeds')
+        .doc(feedId)
+        .delete()
+        .then((value) {
+      print('Feed deleted successfully from userFeeds');
+    })
+        .catchError((error) {
+      print('Failed to delete feed from userFeeds: $error');
+    });
+  }
 
   static void likeFeed(String? currentUserId, Feed feed) {
     DocumentReference feedDocProfile =

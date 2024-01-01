@@ -2,12 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_test/model/parentModel.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
-import 'package:workshop_test/screen/feedContainerBoth.dart';
+import 'package:workshop_test/widget/feedContainerBoth.dart';
 import '../constants/constants.dart';
 import '../model/educatorModel.dart';
 import '../model/feedModel.dart';
 import '../services/databaseServices.dart';
-import '../widget/feedContainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -88,36 +87,13 @@ class _MainScreenState extends State<MainScreen> {
       // Set the fetched feeds directly to _followingFeeds
       _followingFeeds = _allFeeds.toList(); // Assuming all fetched feeds are to be followed
 
-      print('Fetched Feeds:');
-      _allFeeds.forEach((feed) {
-        print('Feed ID: ${feed.id}, Author ID: ${feed.authorId}, Text: ${feed.text}');
-      });
-
-      print('Following Feeds:');
-      _followingFeeds.forEach((feed) {
-        print('Feed ID: ${feed.id}, Author ID: ${feed.authorId}, Text: ${feed.text}');
-      });
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _loadFeedData();
     setupFollowingFeeds();
-  }
-
-  Future<void> _loadFeedData() async {
-    _prefs = await SharedPreferences.getInstance();
-    final savedFeedIds = _prefs.getStringList('following_feeds') ?? [];
-    setState(() {
-      _followingFeeds = savedFeedIds;
-    });
-  }
-
-  Future<void> _saveFeedData(List<String> feedIds) async {
-    _prefs = await SharedPreferences.getInstance();
-    await _prefs.setStringList('following_feeds', feedIds);
   }
 
   @override

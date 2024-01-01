@@ -22,7 +22,7 @@ class ParentLoginController {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MainScreen(currentUserId: uid),
+            builder: (context) => MainFeedPageParent(currentUserId: uid),
           ),
         );
 

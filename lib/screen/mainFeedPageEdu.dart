@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_test/model/educatorModel.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
-import 'package:workshop_test/widget/feedContainerEdu.dart';
+import 'package:workshop_test/widget/feedContainerBoth.dart';
 import '../constants/constants.dart';
 import '../model/feedModel.dart';
 import '../services/databaseServices.dart';
-import '../widget/feedContainer.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 
 class MainFeedPageEdu extends StatefulWidget {
@@ -22,33 +20,11 @@ class MainFeedPageEdu extends StatefulWidget {
 class _MainFeedPageEduState extends State<MainFeedPageEdu> {
   List _followingFeeds = [];
   bool _loading = false;
-  int _selectedTabIndex = 0;
-  late List<Widget> _pages;
-  late SharedPreferences _prefs;
-
-
-  Feed? get feed {
-    if (_followingFeeds.isNotEmpty) {
-      return _followingFeeds.first; // Return the first feed from the list
-    } else {
-      return null; // Return null if the list is empty
-    }
-  }
-
-  EducatorModel? get edu {
-    // Assuming edu data is associated with the first feed in the list
-    if (_followingFeeds.isNotEmpty) {
-      return _followingFeeds.single; // Access edu from the first feed
-    } else {
-      return null; // Return null if the list is empty
-    }
-  }
-
 
   buildFeeds(Feed feed, EducatorModel edu) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
-      child: FeedContainerEdu(
+      child: FeedContainerBoth(
         feed: feed,
         edu: edu,
         currentUserId: widget.currentUserId,
@@ -94,23 +70,10 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
   @override
   void initState() {
     super.initState();
-    _loadFeedData();
     setupFollowingFeeds();
 
   }
 
-  Future<void> _loadFeedData() async {
-    _prefs = await SharedPreferences.getInstance();
-    final savedFeedIds = _prefs.getStringList('following_feeds') ?? [];
-    setState(() {
-      _followingFeeds = savedFeedIds;
-    });
-  }
-
-  Future<void> _saveFeedData(List<String> feedIds) async {
-    _prefs = await SharedPreferences.getInstance();
-    await _prefs.setStringList('following_feeds', feedIds);
-  }
 
 
   @override
@@ -180,26 +143,6 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
 
         ),
 
-      ),
-    );
-  }
-
-  @override
-  Widget buildMenu(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedTabIndex], // Show the selected page
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedTabIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedTabIndex = index; // Update the selected tab index
-          });
-        },
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Menu'),
-          // Add other bottom navigation items as needed
-        ],
       ),
     );
   }

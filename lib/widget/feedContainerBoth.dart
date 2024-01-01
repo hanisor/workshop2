@@ -8,7 +8,7 @@ import '../model/commentModel.dart';
 import '../model/feedModel.dart';
 import '../model/parentModel.dart';
 import '../services/databaseServices.dart';
-import 'commentScreen.dart';
+import '../screen/commentScreen.dart';
 
 class FeedContainerBoth extends StatefulWidget {
   final Feed feed;
@@ -34,9 +34,6 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
   int _likesCount = 0;
   bool _isLiked = false;
   final _commentController = TextEditingController();
-  final List<Comment> _comments = [];
-  List<Comment> _allComments = []; // List to store fetched comments
-  late SharedPreferences _prefs;
   String? _authorName;
   String? _profilePictureURL;
 
@@ -67,10 +64,6 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
   }
 
   void _showCommentScreen() {
-    print('Current User ID: ${widget.currentUserId}');
-    print('Feed ID: ${widget.feed.id}');
-    print('Comments: $_allComments');
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -93,56 +86,46 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
   void initState() {
     super.initState();
     _likesCount = widget.feed!.likes;
-    //_initializeSharedPreferences();
     initFeedLikes();
     _fetchAuthorDetails();
-    // _fetchComments();
   }
 
   void _fetchAuthorDetails() async {
     String? authorId = widget.feed?.authorId;
 
-    if (widget.parent != null) {
-      _authorName = widget.parent!.parentName;
-      _profilePictureURL = widget.parent!.parentProfilePicture;
-    } else if (widget.edu != null) {
-      _authorName = widget.edu!.educatorName;
-      _profilePictureURL = widget.edu!.educatorProfilePicture;
-    } else {
-      // Fetch author details from Firestore using authorId
-      DocumentSnapshot authorDoc =
-      await FirebaseFirestore.instance.collection('feeds').doc(authorId).get();
+    if (authorId != null) {
+      DocumentSnapshot authorSnapshot;
 
-      if (authorDoc.exists) {
-        setState(() {
-          _authorName = authorDoc['name'];
-          _profilePictureURL = authorDoc['profilePictureURL'];
-        });
-      }
-    }
-  }
-
-/*
-  void _fetchComments() async {
-    if (mounted) {
       try {
-        // Fetch comments directly from Firestore
-        List<Comment> comments = await CommentController.fetchCommentsForFeed();
-        if (mounted) {
+        // Check if the authorId exists in Parents collection
+        authorSnapshot = await FirebaseFirestore.instance.collection('parents').doc(authorId).get();
+
+        if (authorSnapshot.exists) {
           setState(() {
-            _allComments = comments;
+            _authorName = authorSnapshot['parentName'];
+            _profilePictureURL = authorSnapshot['parentProfilePicture'];
           });
+
+        } else {
+          // If not found in Parents collection, try finding in Educators collection
+          authorSnapshot = await FirebaseFirestore.instance.collection('educators').doc(authorId).get();
+
+          if (authorSnapshot.exists) {
+            setState(() {
+              _authorName = authorSnapshot['educatorName'];
+              _profilePictureURL = authorSnapshot['educatorProfilePicture'];
+            });
+
+          } else {
+          }
         }
       } catch (e) {
-        // Handle errors, e.g., print or show an error message
-        print('Error fetching comments: $e');
+        print('Error fetching author details: $e');
       }
+    } else {
+      print('Author ID is null');
     }
   }
-
-*/
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -152,13 +135,14 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
             Row(
               children: [
                 CircleAvatar(
                   radius: 20,
                   backgroundImage: _profilePictureURL != null
                       ? NetworkImage(_profilePictureURL!)
-                      : AssetImage('path/to/default/image') as ImageProvider,
+                      : AssetImage('assets/profilePic.png') as ImageProvider,
                 ),
                 SizedBox(width: 10),
                 Text(
@@ -167,6 +151,27 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+                Spacer(),
+                PopupMenuButton(
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      PopupMenuItem(
+                        child: ListTile(
+                          leading: Icon(Icons.delete),
+                          title: Text('Delete'),
+                          onTap: () {
+                            String? feedId = widget.feed?.id;
+                            String? authorId = widget.feed?.authorId;
+                            String timestamp = widget.feed.timestamp.toDate().toString().substring(0, 19);
+                            Navigator.pop(context);
+                            DatabaseServices.deleteFeedFromUserFeeds(feedId!, authorId!);
+
+                          },
+                        ),
+                      ),
+                    ];
+                  },
                 ),
               ],
             ),
@@ -180,7 +185,7 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
             SizedBox(height: 15),
             widget.feed.image.isEmpty
                 ? SizedBox.shrink()
-                : Container(
+                :Container(
               height: 250,
               decoration: BoxDecoration(
                 color: AutiTrackColor,

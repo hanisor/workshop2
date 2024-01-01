@@ -87,4 +87,32 @@ class CommentController {
       return []; // Return an empty list or handle the error accordingly
     }
   }
+  static Future<Map<String, dynamic>?> getUserInfo(String? authorId) async {
+    try {
+      DocumentSnapshot parentSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(authorId)
+          .get();
+
+      if (parentSnapshot.exists) {
+        print('Parent data exists: ${parentSnapshot.data()}');
+        return parentSnapshot.data() as Map<String, dynamic>;
+      }
+
+      DocumentSnapshot educatorSnapshot = await FirebaseFirestore.instance
+          .collection('educators')
+          .doc(authorId)
+          .get();
+
+      if (educatorSnapshot.exists) {
+        print('Educator data exists: ${educatorSnapshot.data()}');
+        return educatorSnapshot.data() as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print('Error fetching user: $e');
+    }
+
+    print('No user data found for authorId: $authorId');
+  }
+
 }
