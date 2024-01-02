@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:workshop_test/screen/new.dart';
 import '../model/parentModel.dart';
 import '../screen/mainFeedPageParent.dart';
 import '../screen/mainScreen.dart';
@@ -22,7 +20,7 @@ class ParentLoginController {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MainFeedPageParent(currentUserId: uid),
+            builder: (context) => MainScreen(currentUserId: uid),
           ),
         );
 

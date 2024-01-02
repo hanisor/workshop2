@@ -17,6 +17,7 @@ class EducatorRegistration extends StatefulWidget {
 
 class _EducatorRegistrationState extends State<EducatorRegistration> {
   final educatorNameEditingController = TextEditingController();
+  final educatorFullNameEditingController = TextEditingController();
   final educatorEmailEditingController = TextEditingController();
   final educatorPhoneEditingController = TextEditingController();
   final educatorExpertiseEditingController = TextEditingController();
@@ -37,6 +38,7 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
   void createAccount() async {
     String eName = educatorNameEditingController.text.trim();
+    String eFullName = educatorFullNameEditingController.text.trim();
     String eEmail = educatorEmailEditingController.text.trim();
     String ePhone = educatorPhoneEditingController.text.trim();
     String eExpertise = educatorExpertiseEditingController.text.trim();
@@ -53,6 +55,7 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
     EducatorModel educator = EducatorModel(
       id: eId, // Assign the 'id' here
+      educatorFullName: '',
       educatorName: eName,
       educatorProfilePicture: imageUrl,
       educatorPhoneNumber: ePhone,
@@ -60,7 +63,7 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
       educatorEmail: eEmail,
       educatorPassword: ePassword,
       educatorRePassword: eRePassword,
-      educatorRole: eRole,
+      role: eRole,
     );
 
 
@@ -69,17 +72,20 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
     try {
       String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       // Access Firestore collection reference for parents or users
-      CollectionReference parentsCollection = FirebaseFirestore.instance.collection('educators');
+      CollectionReference educatorsCollection = FirebaseFirestore
+          .instance.collection('educators');
 
       // Add the parent data to Firestore with the UID as the document ID
-      await parentsCollection.doc(uid).set({
+      await educatorsCollection.doc(uid).set({
         'educatorName': eName,
+        'educatorFullName': eFullName,
         'educatorProfilePicture': imageUrl,
         'educatorPhoneNumber': ePhone,
         'educatorEmail': eEmail,
+        'educatorExpertise': eExpertise,
         'educatorPassword': ePassword,
         'educatorRePassword': eRePassword,
-        'educatorRole': eRole,
+        'role': eRole,
       });
 
       // Proceed with navigation or any other operations after successful document creation
@@ -93,7 +99,8 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage = await _picker.pickImage(
+        source: ImageSource.gallery);
 
     setState(() {
       if (pickedImage != null) {
@@ -171,7 +178,23 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
                     ),
                     prefixIcon: const Icon(Icons.person_outline),
-                    hintText: "Enter your name"),  controller: educatorNameEditingController,
+                    hintText: "Enter your full name"),
+                controller: educatorFullNameEditingController,
+
+              ),
+            ),Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                          width: 2, color: Colors.deepOrangeAccent),
+                      borderRadius: BorderRadius.circular(50.0),
+
+                    ),
+                    prefixIcon: const Icon(Icons.person_outline),
+                    hintText: "Enter your username"),
+                controller: educatorNameEditingController,
 
               ),
             ),
@@ -219,7 +242,9 @@ class _EducatorRegistrationState extends State<EducatorRegistration> {
 
                     ),
                     prefixIcon: const Icon(Icons.email_outlined),
-                    hintText: "Enter your email"), keyboardType: TextInputType.emailAddress, controller: educatorEmailEditingController
+                    hintText: "Enter your email"),
+                  keyboardType: TextInputType.emailAddress,
+                  controller: educatorEmailEditingController
 
               ),
             ),

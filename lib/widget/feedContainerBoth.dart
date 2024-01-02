@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workshop_test/constants/constants.dart';
 import 'package:workshop_test/model/educatorModel.dart';
-import '../model/commentModel.dart';
+import 'package:workshop_test/widget/userDetailsContainer.dart';
 import '../model/feedModel.dart';
 import '../model/parentModel.dart';
 import '../services/databaseServices.dart';
@@ -36,6 +35,8 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
   final _commentController = TextEditingController();
   String? _authorName;
   String? _profilePictureURL;
+  ParentModel? _parent;
+  EducatorModel? _edu;
 
   initFeedLikes() async {
     bool isLiked =
@@ -127,6 +128,57 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
     }
   }
 
+  Widget buildPopupMenu() {
+    return PopupMenuButton(
+      itemBuilder: (BuildContext context) {
+        return [
+          PopupMenuItem(
+            child: ListTile(
+              leading: Icon(Icons.info_outline),
+              title: Text('User Information'),
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.4, // Adjust the height here
+                      child: ListView(
+                        padding: EdgeInsets.all(20),
+                        children: [
+                          if (widget.parent != null)
+                            UserDetailsContainer(parent: widget.parent),
+                          if (widget.edu != null)
+                            UserDetailsContainer(edu: widget.edu),
+                          // Add other cases or content here if needed
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          PopupMenuItem(
+            child: ListTile(
+              leading: Icon(Icons.delete),
+              title: Text('Delete'),
+              onTap: () {
+                String? feedId = widget.feed?.id;
+                String? authorId = widget.feed?.authorId;
+                String timestamp =
+                widget.feed.timestamp.toDate().toString().substring(0, 19);
+                Navigator.pop(context);
+                DatabaseServices.deleteFeedFromUserFeeds(feedId!, authorId!);
+              },
+            ),
+          ),
+        ];
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -153,28 +205,10 @@ class _FeedContainerBothState extends State<FeedContainerBoth> {
                   ),
                 ),
                 Spacer(),
-                PopupMenuButton(
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
-                        child: ListTile(
-                          leading: Icon(Icons.delete),
-                          title: Text('Delete'),
-                          onTap: () {
-                            String? feedId = widget.feed?.id;
-                            String? authorId = widget.feed?.authorId;
-                            String timestamp = widget.feed.timestamp.toDate().toString().substring(0, 19);
-                            Navigator.pop(context);
-                            DatabaseServices.deleteFeedFromUserFeeds(feedId!, authorId!);
-
-                          },
-                        ),
-                      ),
-                    ];
-                  },
-                ),
+                buildPopupMenu(), // Show the PopupMenuButton
               ],
             ),
+
             const SizedBox(height: 15),
             Text(
               widget.feed.text,

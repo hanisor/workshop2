@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EducatorModel {
   String? id;
+  final String educatorFullName;
   final String educatorName;
   String educatorProfilePicture;
   final String educatorExpertise;
@@ -9,10 +10,11 @@ class EducatorModel {
   final String educatorEmail;
   final String educatorPassword;
   final String educatorRePassword;
-  final String educatorRole;
+  final String role;
 
-  EducatorModel ({
+  EducatorModel ( {
     this.id,
+    required this.educatorFullName,
     required this.educatorName,
     required this.educatorProfilePicture,
     required this.educatorExpertise,
@@ -20,7 +22,7 @@ class EducatorModel {
     required this.educatorEmail,
     required this.educatorPassword,
     required this.educatorRePassword,
-    required this.educatorRole,
+    required this.role,
   });
 
   factory EducatorModel.fromDoc(DocumentSnapshot doc) {
@@ -28,6 +30,7 @@ class EducatorModel {
 
     return EducatorModel(
       id: doc.id,
+      educatorFullName: data?['educatorFullName'] ?? '', // Use null-aware operator to handle null values
       educatorName: data?['educatorName'] ?? '', // Use null-aware operator to handle null values
       educatorProfilePicture: data?['educatorProfilePicture'] ?? '',
       educatorExpertise: data?['educatorExpertise'] ?? '',
@@ -35,7 +38,7 @@ class EducatorModel {
       educatorEmail: data?['educatorEmail'] ?? '',
       educatorPassword: data?['educatorPassword'] ?? '',
       educatorRePassword: data?['educatorRePassword'] ?? '',
-      educatorRole: data?['educatorRole'] ?? '',
+      role: data?['role'] ?? '',
     );
   }
 }

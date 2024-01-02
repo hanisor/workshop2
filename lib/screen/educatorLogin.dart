@@ -27,12 +27,13 @@ class _EducatorLogin extends State<EducatorLogin> {
     EducatorModel educator = EducatorModel(
       educatorEmail: eEmail,
       educatorPassword: ePassword,
+      educatorFullName: '',
       educatorName: '',
       educatorProfilePicture: '',
       educatorExpertise: '',
       educatorPhoneNumber: '',
       educatorRePassword: '',
-      educatorRole: '',
+      role: '',
     );
 
     _controller.login(context, educator);

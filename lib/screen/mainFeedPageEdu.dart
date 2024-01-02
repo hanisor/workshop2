@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_test/model/educatorModel.dart';
 import 'package:workshop_test/screen/addFeedPage.dart';
-import 'package:workshop_test/widget/feedContainerBoth.dart';
 import '../constants/constants.dart';
 import '../model/feedModel.dart';
 import '../services/databaseServices.dart';
+import '../widget/feedContainerPersonalPage.dart';
 
 
 class MainFeedPageEdu extends StatefulWidget {
@@ -24,11 +24,13 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
   buildFeeds(Feed feed, EducatorModel edu) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
-      child: FeedContainerBoth(
+      child: FeedContainerPersonalPage(
         feed: feed,
         edu: edu,
         currentUserId: widget.currentUserId,
         users: [],
+        isParent: false,
+        isEdu: true,
       ),
     );
   }
@@ -79,7 +81,7 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.amber[50],
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.white,
         onPressed: () {
@@ -94,7 +96,7 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
 
       ),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.amber[50],
         elevation: 0.5,
         centerTitle: true,
         leading: Container(
@@ -103,7 +105,7 @@ class _MainFeedPageEduState extends State<MainFeedPageEdu> {
         title: Text(
           'Feeds',
           style: TextStyle(
-            color: AutiTrackColor,
+            color: Colors.black,
           ),
         ),
       ),

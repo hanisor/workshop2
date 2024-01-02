@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../Constants/Constants.dart';
 import '../model/feedModel.dart';
+import '../model/parentModel.dart';
 
 
 class DatabaseServices {
@@ -21,7 +22,7 @@ class DatabaseServices {
     });
   }
 
-  static Future<List> getUserFeeds(String? userId) async {
+  static Future<List<Feed>> getUserFeeds(String? userId) async {
     QuerySnapshot userFeedsSnap = await feedRefs
         .doc(userId)
         .collection('userFeeds')
@@ -32,7 +33,6 @@ class DatabaseServices {
 
     return userFeeds;
   }
-
 
   static Future<List<Feed>> retrieveSubFeeds() async {
     List<Feed> feeds = [];
@@ -53,13 +53,35 @@ class DatabaseServices {
             .map((subDoc) => Feed.fromDoc(subDoc))
             .toList();
 
-        feeds.addAll(subFeeds);
+        // Loop through the subFeeds and add them to feeds list
+        for (Feed feed in subFeeds) {
+          feeds.add(feed);
+        }
       }
     } catch (e) {
       print("Error retrieving sub feeds: $e");
     }
 
     return feeds;
+  }
+
+
+  Future<ParentModel?> fetchParentDetails(String? currentUserId) async {
+    if (currentUserId != null) {
+      try {
+        // Replace 'parentCollection' with your actual Firestore collection name
+        DocumentSnapshot parentSnapshot = await firestoreInstance.collection('parents').doc(currentUserId).get();
+
+        if (parentSnapshot.exists) {
+          // Assuming ParentModel.fromSnapshot is a factory method in ParentModel class
+          return ParentModel.fromDoc(parentSnapshot);
+
+        }
+      } catch (e) {
+        print('Error fetching parent details: $e');
+      }
+    }
+    return null; // Return null if no details found or if currentUserId is null
   }
 
 

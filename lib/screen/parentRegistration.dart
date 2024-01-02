@@ -18,6 +18,7 @@ class ParentRegistration extends StatefulWidget {
 
 class _ParentRegistrationState extends State<ParentRegistration> {
   final parentNameEditingController = TextEditingController();
+  final parentFullNameEditingController = TextEditingController();
   final parentEmailEditingController = TextEditingController();
   final parentPhoneEditingController  = TextEditingController();
   final parentPasswordEditingController  =
@@ -36,6 +37,7 @@ class _ParentRegistrationState extends State<ParentRegistration> {
 
   void createAccount() async {
     String pName = parentNameEditingController.text.trim();
+    String pFullName = parentFullNameEditingController.text.trim();
     String pEmail = parentEmailEditingController.text.trim();
     String pPhone = parentPhoneEditingController.text.trim();
     String pPassword = parentPasswordEditingController.text.trim();
@@ -51,6 +53,7 @@ class _ParentRegistrationState extends State<ParentRegistration> {
 
     ParentModel parent = ParentModel(
       parentName: pName,
+      parentFullName: pFullName,
       parentProfilePicture: imageUrl,
       parentPhoneNumber: pPhone,
       parentEmail: pEmail,
@@ -71,6 +74,7 @@ class _ParentRegistrationState extends State<ParentRegistration> {
       // Add the parent data to Firestore with the UID as the document ID
       await parentsCollection.doc(uid).set({
         'parentName': pName,
+        'parentFullName': pFullName,
         'parentProfilePicture': imageUrl,
         'parentPhoneNumber': pPhone,
         'parentEmail': pEmail,
@@ -168,7 +172,22 @@ class _ParentRegistrationState extends State<ParentRegistration> {
 
                       ),
                       prefixIcon: const Icon(Icons.person_outline),
-                      hintText: "Enter your name"),
+                      hintText: "Enter your full name"),
+                  controller: parentFullNameEditingController,
+
+                ),
+              ),Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            width: 2, color: Colors.deepOrangeAccent),
+                        borderRadius: BorderRadius.circular(50.0),
+
+                      ),
+                      prefixIcon: const Icon(Icons.person_outline),
+                      hintText: "Enter your username"),
                   controller: parentNameEditingController,
 
                 ),

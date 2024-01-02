@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_test/model/parentModel.dart';
-import 'package:workshop_test/screen/addFeedPage.dart';
 import 'package:workshop_test/widget/feedContainerBoth.dart';
 import '../constants/constants.dart';
 import '../model/educatorModel.dart';
@@ -39,37 +38,45 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-  Widget showFeeds(Feed feed)  {
+  Widget showFeeds(Feed feed) {
     return FutureBuilder<DocumentSnapshot>(
-      future: parentRef.doc(feed.authorId).get(),
+      future: FirebaseFirestore.instance.collection('parents').doc(feed.authorId).get(),
       builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // Show a loading indicator while waiting for data
+          return CircularProgressIndicator();
         } else if (snapshot.hasData && snapshot.data != null) {
-          DocumentSnapshot userData = snapshot.data!;
-          if (userData.exists) {
-            List<Widget> followingFeedsList = [];
-            for (Feed feed in _followingFeeds) {
-              if (userData['role'] == "parent") {
-                ParentModel parent = ParentModel.fromDoc(userData);
-                parent.id = feed.authorId;
-                followingFeedsList.add(buildFeeds(feed, parent: parent));
-              } else {
-                EducatorModel edu = EducatorModel.fromDoc(userData);
-                edu.id = feed.authorId;
-                followingFeedsList.add(buildFeeds(feed, edu: edu));
-              }
-            }
-            return Column(children: followingFeedsList);
+          DocumentSnapshot parentData = snapshot.data!;
+          if (parentData.exists && parentData['role'] == 'parent') {
+            ParentModel parent = ParentModel.fromDoc(parentData);
+            parent.id = feed.authorId;
+            return buildFeeds(feed, parent: parent);
           } else {
-            return const SizedBox.shrink(); // Return an empty SizedBox if there's no data
+            // If not a parent, check educators collection
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance.collection('educators').doc(feed.authorId).get(),
+              builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> eduSnapshot) {
+                if (eduSnapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (eduSnapshot.hasData && eduSnapshot.data != null) {
+                  DocumentSnapshot eduData = eduSnapshot.data!;
+                  if (eduData.exists && eduData['role'] == 'educator') {
+                    EducatorModel edu = EducatorModel.fromDoc(eduData);
+                    edu.id = feed.authorId;
+                    return buildFeeds(feed, edu: edu);
+                  }
+                }
+                // If not found in educators collection, return empty SizedBox
+                return SizedBox.shrink();
+              },
+            );
           }
-        } else {
-          return const SizedBox.shrink(); // Return an empty SizedBox if there's no data
         }
+        // If no data or conditions don't match, return empty SizedBox
+        return SizedBox.shrink();
       },
     );
   }
+
 
   Future<void> setupFollowingFeeds() async {
     setState(() {
@@ -99,22 +106,9 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      AddFeedPage(
-                        currentUserId: widget.currentUserId,
-                      )));
-        }, child: const Icon(Icons.add),
-
-      ),
+      backgroundColor: Colors.amber[50],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.amber[50],
         elevation: 0.5,
         centerTitle: true,
         leading: Container(
@@ -123,7 +117,7 @@ class _MainScreenState extends State<MainScreen> {
         title: Text(
           'Feeds',
           style: TextStyle(
-            color: AutiTrackColor,
+            color: Colors.black,
           ),
         ),
       ),

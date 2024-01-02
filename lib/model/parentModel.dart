@@ -10,9 +10,12 @@ class ParentModel {
   final String parentRePassword;
   final String role;
 
+  var parentFullName;
+
   ParentModel({
     this.id,
     required this.parentName,
+    required this.parentFullName,
     required this.parentProfilePicture,
     required this.parentPhoneNumber,
     required this.parentEmail,
@@ -26,6 +29,7 @@ class ParentModel {
     return ParentModel(
       id: doc.id,
       parentName: data?['parentName'] ?? '', // Use null-aware operator to handle null values
+      parentFullName: data?['parentFullName'] ?? '', // Use null-aware operator to handle null values
       parentProfilePicture: data?['parentProfilePicture'] ?? '',
       parentPhoneNumber: data?['parentPhoneNumber'] ?? '',
       parentEmail: data?['parentEmail'] ?? '',
@@ -35,15 +39,5 @@ class ParentModel {
     );
   }
 
-  // Map<String, dynamic> toMap() {
-  //   return {
-  //     'parentName': parentName,
-  //     'parentProfilePicture': parentProfilePicture,
-  //     'parentPhoneNumber': parentPhoneNumber,
-  //     'parentEmail': parentEmail,
-  //     'parentPassword': parentPassword,
-  //     'parentRePassword': parentRePassword,
-  //     'role': role,
-  //   };
-  // }
+
 }
